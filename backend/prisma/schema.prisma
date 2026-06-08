@@ -1,0 +1,445 @@
+// Prisma Schema for Education Management System
+// Run: npx prisma migrate dev --name init
+// Run: npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  BRANCH_ADMIN
+  STUDENT
+}
+
+enum PaymentStatus {
+  FULL_PAID
+  PARTIAL_PAID
+  PENDING
+}
+
+enum ExamStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CertificateStatus {
+  ISSUED
+  PENDING
+  REVOKED
+}
+
+// ─────────────────────────────────────────────
+// Users (Super Admin + Branch Admin accounts)
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(BRANCH_ADMIN)
+  avatar       String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  branch        Branch?        @relation("BranchAdmin")
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// Branches
+// ─────────────────────────────────────────────
+
+model Branch {
+  id         String   @id @default(cuid())
+  branchCode String   @unique // e.g. 10254
+  atpNo      String?  @unique // Authorised Training Provider reg. no, e.g. DYAN/ATP/10254
+  name       String
+  logo       String?
+  address    String
+  location   String
+  aadharNo   String?
+  aadharImage String?
+  panNo      String?
+  panImage   String?
+  phone1     String
+  phone2     String?
+  adminId    String   @unique
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  admin        User          @relation("BranchAdmin", fields: [adminId], references: [id])
+  students     Student[]
+  exams        Exam[]
+  enrollments  Enrollment[]
+  certificates Certificate[]
+  schedules    Schedule[]
+
+  @@index([name])
+  @@index([isActive])
+  @@map("branches")
+}
+
+// ─────────────────────────────────────────────
+// Courses
+// ─────────────────────────────────────────────
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questionPapers QuestionPaper[]
+  enrollments    Enrollment[]
+  examCourses    ExamCourse[]
+  schedules      Schedule[]
+  certificates   Certificate[]
+
+  @@map("courses")
+}
+
+// ─────────────────────────────────────────────
+// Question Papers
+// ─────────────────────────────────────────────
+
+model QuestionPaper {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  examCourses ExamCourse[]
+
+  @@map("question_papers")
+}
+
+// ─────────────────────────────────────────────
+// Questions (MCQ)
+// ─────────────────────────────────────────────
+
+model Question {
+  id              String   @id @default(cuid())
+  questionPaperId String
+  questionNo      Int
+  questionText    String
+  options         Json // string[]
+  correctOption   Int // 0-indexed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questionPaper QuestionPaper @relation(fields: [questionPaperId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+// ─────────────────────────────────────────────
+// Students
+// ─────────────────────────────────────────────
+
+model Student {
+  id         String    @id @default(cuid())
+  prn        String    @unique // e.g. PRN2987985217
+  firstName  String
+  middleName String?
+  lastName   String
+  email      String?   @unique
+  phone     String
+  address   String?
+  dob       DateTime?
+  branchId  String
+  photo     String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  branch       Branch              @relation(fields: [branchId], references: [id])
+  enrollments  Enrollment[]
+  examResults  ExamResult[]
+  examStudents ExamStudent[]
+  certificates Certificate[]
+  credentials  StudentCredential[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([branchId])
+  @@index([isActive])
+  @@map("students")
+}
+
+// ─────────────────────────────────────────────
+// Student Exam Credentials (Day-specific passwords)
+// ─────────────────────────────────────────────
+
+model StudentCredential {
+  id           String   @id @default(cuid())
+  studentId    String
+  examDate     DateTime // The specific date this password is valid for
+  passwordHash String
+  passwordPlain String? // Plain password stored for admin display
+
+  // 24-hour validity window
+  validFrom    DateTime // Exam date 00:00
+  validUntil   DateTime // Exam date 23:59:59
+  
+  displayedAt  DateTime? // Track when password was shown to admin
+  notifiedAt   DateTime? // Track when student was notified of password
+  passwordViewedAt DateTime? // Track when password was viewed by admin
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  auditLogs AuditLog[]
+
+  @@unique([studentId, examDate])
+  @@index([examDate])
+  @@index([validFrom])
+  @@index([validUntil])
+  @@map("student_credentials")
+}
+
+// ─────────────────────────────────────────────
+// Audit Logs (Track password views, actions)
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id                   String   @id @default(cuid())
+  action               String   // e.g., "PASSWORD_GENERATED", "PASSWORD_VIEWED", "PASSWORD_VALIDATED"
+  studentCredentialId  String
+  studentId            String
+  examDate             DateTime // For quick filtering
+  userId               String? // Admin who triggered action
+  userRole             String? // SUPER_ADMIN or BRANCH_ADMIN
+  ipAddress            String?
+  userAgent            String?
+  details              String? // JSON details of action
+  createdAt            DateTime @default(now())
+
+  studentCredential StudentCredential @relation(fields: [studentCredentialId], references: [id], onDelete: Cascade)
+
+  @@index([action])
+  @@index([studentId])
+  @@index([examDate])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────
+// Enrollments (Student ↔ Course ↔ Branch)
+// ─────────────────────────────────────────────
+
+model Enrollment {
+  id            String        @id @default(cuid())
+  studentId     String
+  courseId      String
+  branchId      String
+  courseFee     Decimal       @db.Decimal(10, 2) // Total fee for this course enrollment
+  paymentStatus PaymentStatus @default(PENDING)
+  enrolledAt    DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  student  Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course   Course    @relation(fields: [courseId], references: [id])
+  branch   Branch    @relation(fields: [branchId], references: [id])
+  payments Payment[]
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([branchId])
+  @@index([paymentStatus])
+  @@map("enrollments")
+}
+
+// ─────────────────────────────────────────────
+// Payments
+// ─────────────────────────────────────────────
+
+model Payment {
+  id                    String        @id @default(cuid())
+  enrollmentId          String
+  feeTaken              Decimal       @db.Decimal(10, 2) // Amount paid in this installment
+  courseFee             Decimal       @db.Decimal(10, 2) // Total course fee for reference
+  paymentStatus         PaymentStatus @default(PENDING)
+  paidAt                DateTime?
+  nextInstallmentDate   DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────
+// Exams
+// ─────────────────────────────────────────────
+
+model Exam {
+  id          String     @id @default(cuid())
+  branchId    String
+  examDate    DateTime
+  status      ExamStatus @default(PENDING)
+  notes       String?
+  numStudents Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  examCourses ExamCourse[]
+  examResults ExamResult[]
+  examStudents ExamStudent[]
+
+  @@index([branchId])
+  @@index([examDate])
+  @@index([status])
+  @@map("exams")
+}
+
+// ─────────────────────────────────────────────
+// ExamStudent (tracks which students were selected for this exam)
+// ─────────────────────────────────────────────
+
+model ExamStudent {
+  id        String  @id @default(cuid())
+  examId    String
+  studentId String
+
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+  @@map("exam_students")
+}
+
+// ─────────────────────────────────────────────
+// ExamCourse (Exam ↔ Course ↔ QuestionPaper)
+// ─────────────────────────────────────────────
+
+model ExamCourse {
+  id              String  @id @default(cuid())
+  examId          String
+  courseId        String
+  questionPaperId String?
+
+  exam          Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  course        Course         @relation(fields: [courseId], references: [id])
+  questionPaper QuestionPaper? @relation(fields: [questionPaperId], references: [id])
+
+  @@unique([examId, courseId])
+  @@map("exam_courses")
+}
+
+// ─────────────────────────────────────────────
+// Exam Results
+// ─────────────────────────────────────────────
+
+model ExamResult {
+  id        String   @id @default(cuid())
+  examId    String
+  studentId String
+  marks     Int
+  grade     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+  @@map("exam_results")
+}
+
+// ─────────────────────────────────────────────
+// Certificates
+// ─────────────────────────────────────────────
+
+model Certificate {
+  id        String            @id @default(cuid())
+  certNo    String?           @unique // e.g. DYAN/10254/2026/0001
+  studentId String
+  branchId  String
+  courseId  String?
+  examDate  DateTime?
+  marks     Int?
+  status    CertificateStatus @default(PENDING)
+  issuedAt  DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  branch  Branch   @relation(fields: [branchId], references: [id])
+  course  Course?  @relation(fields: [courseId], references: [id])
+
+  @@map("certificates")
+}
+
+// Refresh tokens for session management
+// ─────────────────────────────────────────────
+// Class Schedules
+// ─────────────────────────────────────────────
+
+model Schedule {
+  id           String   @id @default(cuid())
+  branchId     String
+  courseId     String
+  dayOfWeek    String   // 'MONDAY', 'TUESDAY', etc.
+  startTime    String   // HH:MM format
+  endTime      String   // HH:MM format
+  location     String?  // Classroom/location name
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, courseId, dayOfWeek])
+  @@map("schedules")
+}
+
+// ─────────────────────────────────────────────
+// Refresh Tokens
+// ─────────────────────────────────────────────
+
+model RefreshToken {
+  id           String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}

@@ -1,0 +1,267 @@
+import bcrypt from 'bcryptjs';
+import { prisma } from '../../config/prisma.js';
+import { config } from '../../config/index.js';
+import { getPaginationParams, buildPaginationMeta } from '../../utils/response.js';
+import { logPasswordValidated } from '../../utils/auditLog.js';
+import type { StudentQuery, CreateStudentDto } from './students.schema.js';
+
+// ── Helpers ────────────────────────────────────────────────────
+
+const generatePrn = (): string => {
+  const num = Math.floor(Math.random() * 9_000_000_000) + 1_000_000_000;
+  return `PRN${num}`;
+};
+
+const buildStudentWhere = (q: StudentQuery, branchId?: string) => {
+  const where: Record<string, unknown> = { isActive: true };
+
+  // BRANCH_ADMIN scope — always filter by their branch
+  if (branchId) where.branchId = branchId;
+  else if (q.branchId) where.branchId = q.branchId;
+
+  if (q.search) {
+    where.OR = [
+      { firstName: { contains: q.search, mode: 'insensitive' } },
+      { lastName:  { contains: q.search, mode: 'insensitive' } },
+      { prn:       { contains: q.search, mode: 'insensitive' } },
+      { email:     { contains: q.search, mode: 'insensitive' } },
+    ];
+  }
+  if (q.paymentStatus) {
+    where.enrollments = { some: { paymentStatus: q.paymentStatus } };
+  }
+  return where;
+};
+
+// ── Service Methods ────────────────────────────────────────────
+
+export const listStudents = async (query: Record<string, unknown>, scopedBranchId?: string) => {
+  const { page, limit, skip, take } = getPaginationParams(query);
+  const q = query as unknown as StudentQuery;
+  const where = buildStudentWhere(q, scopedBranchId);
+
+  const [total, students] = await Promise.all([
+    prisma.student.count({ where }),
+    prisma.student.findMany({
+      where, skip, take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        branch: { select: { id: true, name: true, location: true } },
+        enrollments: { include: { course: { select: { id: true, name: true } } } },
+      },
+    }),
+  ]);
+
+  return { students, meta: buildPaginationMeta(total, page, limit) };
+};
+
+export const getStudentById = async (id: string) => {
+  const student = await prisma.student.findUnique({
+    where: { id },
+    include: {
+      branch: { include: { admin: { select: { email: true } } } },
+      enrollments: { include: { course: true, payments: { orderBy: { createdAt: 'desc' } } } },
+      examResults: { include: { exam: { select: { examDate: true, status: true } } } },
+      certificates: true,
+      credentials: {
+        orderBy: { examDate: 'desc' },
+        take: 1,
+      },
+    },
+  });
+  if (!student) throw Object.assign(new Error('Student not found'), { status: 404 });
+  return {
+    ...student,
+    enrollments: student.enrollments.map((enrollment) => {
+      const latestPaymentWithNextDate =
+        enrollment.payments.find((payment) => payment.nextInstallmentDate) || null;
+      return {
+        ...enrollment,
+        nextInstallmentDate: latestPaymentWithNextDate?.nextInstallmentDate || null,
+      };
+    }),
+  };
+};
+
+export const createStudent = async (data: CreateStudentDto) => {
+  // Generate collision-free PRN
+  let prn: string;
+  do { prn = generatePrn(); }
+  while (await prisma.student.findUnique({ where: { prn } }));
+
+  return prisma.student.create({
+    data: {
+      prn,
+      firstName:  data.firstName,
+      middleName: data.middleName ?? null,
+      lastName:   data.lastName,
+      email:      data.email,
+      phone:      data.phone,
+      address:    data.address,
+      dob:        data.dob ? new Date(data.dob) : undefined,
+      branchId:   data.branchId,
+      photo:      data.photo,
+    },
+  });
+};
+
+export const updateStudent = async (id: string, data: Partial<CreateStudentDto>, actorBranchId?: string) => {
+  // BRANCH_ADMIN may only update students belonging to their own branch
+  if (actorBranchId) {
+    const student = await prisma.student.findUnique({ where: { id }, select: { branchId: true } });
+    if (!student) throw Object.assign(new Error('Student not found'), { status: 404 });
+    if (student.branchId !== actorBranchId) {
+      throw Object.assign(new Error('Access denied: student belongs to a different branch'), { status: 403 });
+    }
+  }
+  const { dob, ...rest } = data;
+  return prisma.student.update({
+    where: { id },
+    data: {
+      ...rest,
+      ...(dob ? { dob: new Date(dob) } : {}),
+    },
+  });
+};
+
+export const softDeleteStudent = async (id: string) => {
+  await prisma.student.update({ where: { id }, data: { isActive: false } });
+};
+
+// ── Enrollment sub-resource ────────────────────────────────────
+
+export const getEnrollments = async (studentId: string) =>
+  prisma.enrollment.findMany({
+    where: { studentId },
+    include: {
+      course:  { select: { id: true, name: true } },
+      branch:  { select: { id: true, name: true } },
+    },
+  });
+
+export const enrollStudentInCourse = async (
+  studentId: string,
+  courseId: string,
+  courseFee: number,
+  paymentStatus: string = 'PENDING'
+) => {
+  const student = await prisma.student.findUnique({ where: { id: studentId } });
+  if (!student) throw Object.assign(new Error('Student not found'), { status: 404 });
+
+  return prisma.enrollment.create({
+    data: { studentId, courseId, branchId: student.branchId, courseFee, paymentStatus: paymentStatus as never },
+    include: { course: { select: { id: true, name: true } } },
+  });
+};
+
+// ── Daily Credentials ──────────────────────────────────────────
+
+/**
+ * Generates a 6-digit random password for a student for a specific exam date.
+ * Replaces any existing password for that date.
+ * Returns plainPassword ONLY at generation time for display to admin.
+ * Never stored in database for security.
+ */
+export const generateDailyPassword = async (studentId: string, examDate: string) => {
+  const date = new Date(examDate);
+  date.setHours(0, 0, 0, 0);
+
+  // Calculate validity window: exam date 00:00 to 23:59:59
+  const validFrom = new Date(date);
+  validFrom.setHours(0, 0, 0, 0);
+  const validUntil = new Date(date);
+  validUntil.setHours(23, 59, 59, 999);
+
+  // Generate a random 6-digit password
+  const plainPassword = Math.floor(100000 + Math.random() * 900000).toString();
+  const passwordHash = await bcrypt.hash(plainPassword, config.bcryptRounds);
+
+  // Store the hash and plainPassword for admin retrieval
+  await prisma.studentCredential.upsert({
+    where: { studentId_examDate: { studentId, examDate: date } },
+    update: { passwordHash, passwordPlain: plainPassword, displayedAt: new Date() },
+    create: { studentId, examDate: date, passwordHash, passwordPlain: plainPassword, displayedAt: new Date(), validFrom, validUntil },
+  });
+
+  // Return plainPassword for immediate one-time display only
+  return { studentId, date, plainPassword };
+};
+
+export const getDailyCredential = async (studentId: string, examDate: string) => {
+  const date = new Date(examDate);
+  date.setHours(0, 0, 0, 0);
+
+  return prisma.studentCredential.findUnique({
+    where: { studentId_examDate: { studentId, examDate: date } },
+  });
+};
+
+/**
+ * Validates student password against stored hash and checks time window
+ * Returns detailed validation result with validity info
+ */
+export const validateStudentPassword = async (
+  studentId: string,
+  examDate: Date,
+  plainPassword: string
+): Promise<{
+  valid: boolean;
+  message: string;
+  validFrom?: Date;
+  validUntil?: Date;
+}> => {
+  const date = new Date(examDate);
+  date.setHours(0, 0, 0, 0);
+
+  // Fetch the credential
+  const credential = await prisma.studentCredential.findUnique({
+    where: { studentId_examDate: { studentId, examDate: date } },
+  });
+
+  // No credential found
+  if (!credential) {
+    await logPasswordValidated('', studentId, date, false, 'No password generated for this exam date');
+    return {
+      valid: false,
+      message: 'No password has been generated for this exam date',
+      validFrom: undefined,
+      validUntil: undefined,
+    };
+  }
+
+  // Check password hash
+  const passwordMatches = await bcrypt.compare(plainPassword, credential.passwordHash);
+  if (!passwordMatches) {
+    await logPasswordValidated(credential.id, studentId, date, false, 'Password mismatch');
+    return {
+      valid: false,
+      message: 'Invalid password',
+      validFrom: credential.validFrom,
+      validUntil: credential.validUntil,
+    };
+  }
+
+  // Check time window
+  const now = new Date();
+  const isWithinWindow = now >= credential.validFrom && now <= credential.validUntil;
+
+  if (!isWithinWindow) {
+    const reason = now < credential.validFrom ? 'Exam date has not started yet' : 'Exam date has ended';
+    await logPasswordValidated(credential.id, studentId, date, false, reason);
+    return {
+      valid: false,
+      message: reason,
+      validFrom: credential.validFrom,
+      validUntil: credential.validUntil,
+    };
+  }
+
+  // All checks passed
+  await logPasswordValidated(credential.id, studentId, date, true, 'Valid password within time window');
+  return {
+    valid: true,
+    message: 'Password is valid and exam is accessible',
+    validFrom: credential.validFrom,
+    validUntil: credential.validUntil,
+  };
+};

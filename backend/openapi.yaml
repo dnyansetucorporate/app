@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Education App API
+  version: 1.0.0
+  description: OpenAPI spec for the Education application (auto-generated minimal spec).
+servers:
+  - url: http://localhost:5000/api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+        password:
+          type: string
+      required: [identifier, password]
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+
+  /auth/me:
+    get:
+      summary: Get current user
+      security: []
+      responses:
+        '200':
+          description: OK
+
+  /courses:
+    get:
+      summary: List courses
+    post:
+      summary: Create course
+  /courses/{id}:
+    get:
+      summary: Get course
+    patch:
+      summary: Update course
+    delete:
+      summary: Delete course
+  /courses/{id}/papers:
+    get:
+      summary: List question papers for a course
+    post:
+      summary: Create question paper
+  /courses/{courseId}/papers/{paperId}:
+    delete:
+      summary: Delete question paper
+  /courses/papers/{paperId}/questions:
+    get:
+      summary: List questions for a paper
+    post:
+      summary: Add question to paper
+  /courses/papers/{paperId}/questions/{questionId}:
+    delete:
+      summary: Remove question
+
+  /branches:
+    get:
+      summary: List branches
+    post:
+      summary: Create branch
+  /branches/stats:
+    get:
+      summary: Branch stats
+  /branches/{id}:
+    get:
+      summary: Get branch
+    patch:
+      summary: Update branch
+    delete:
+      summary: Delete branch
+
+  /students:
+    get:
+      summary: List students
+    post:
+      summary: Create student
+  /students/{id}:
+    get:
+      summary: Get student
+    patch:
+      summary: Update student
+    delete:
+      summary: Delete student
+  /students/{id}/enrollments:
+    get:
+      summary: List student enrollments
+    post:
+      summary: Enroll student to course
+
+  /exams:
+    get:
+      summary: List exams
+    post:
+      summary: Create exam
+  /exams/counts:
+    get:
+      summary: Counts for exams
+  /exams/{id}:
+    get:
+      summary: Get exam
+  /exams/{id}/students:
+    get:
+      summary: Get students for exam
+  /exams/{id}/results:
+    get:
+      summary: Get results for exam
+  /exams/{id}/generate-passwords:
+    post:
+      summary: Generate passwords for exam
+  /exams/{examId}/courses/{courseId}/paper:
+    patch:
+      summary: Assign paper to course in an exam
+
+  /certificates:
+    get:
+      summary: List certificates
+  /certificates/branch/{branchId}/students:
+    get:
+      summary: List branch students eligible for certificates
+  /certificates/{id}:
+    get:
+      summary: Get certificate
+
+  /dashboard/stats:
+    get:
+      summary: Dashboard stats
+  /dashboard/performance:
+    get:
+      summary: Dashboard performance
+  /dashboard/enrollment:
+    get:
+      summary: Enrollment metrics
+  /dashboard/recent-students:
+    get:
+      summary: Recent students
+
+  /student-portal/available-exams:
+    get:
+      summary: List available exams for student
+  /student-portal/exams/{examId}/courses/{courseId}:
+    get:
+      summary: Get questions for exam/course
+  /student-portal/exams/{examId}/submit:
+    post:
+      summary: Submit exam answers
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
