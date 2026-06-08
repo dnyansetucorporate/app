@@ -13,3 +13,4 @@ desktop.ini
 # Docker local overrides
 .env.docker
 docker-compose.override.yml
+docker-compose.yml
