@@ -26,9 +26,6 @@ services:
       - uploads:/app/uploads
     ports:
       - "5000:5000"
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   frontend:
     build:
@@ -39,8 +36,6 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-    depends_on:
-      - backend
 
 volumes:
   postgres_data:
