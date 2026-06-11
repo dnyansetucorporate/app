@@ -77,9 +77,12 @@ const SuperAdminDashboard: React.FC = () => {
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
           setSelectedBranch(sorted[0].id);
+        } else {
+          setLoading(false);
         }
       } catch (err) {
         console.error('Failed to load branches', err);
+        setLoading(false);
       }
     };
     void loadBranches();
