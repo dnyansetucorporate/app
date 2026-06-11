@@ -3,9 +3,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: education
+      POSTGRES_DB: test
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: Test@123
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -19,7 +19,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5000
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/education
+      DATABASE_URL: postgresql://postgres:Test@123    @postgres:5432/test
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
     volumes:
       - uploads:/app/uploads

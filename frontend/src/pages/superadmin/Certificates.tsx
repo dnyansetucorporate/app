@@ -192,36 +192,6 @@ const Certificates: React.FC = () => {
   // (anti-aliased toward white). Instead we drop the white, deepen the gold so it
   // reads as a rich metallic gold (matching the Figma), and set per-pixel alpha
   // from ink density so the line work stays solid and clear over the teal page.
-  const makeOrnamentsGold = (url: string): Promise<string> =>
-    new Promise<string>((resolve) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width  = img.naturalWidth;
-        c.height = img.naturalHeight;
-        const ctx = c.getContext('2d')!;
-        ctx.drawImage(img, 0, 0);
-        const d  = ctx.getImageData(0, 0, c.width, c.height);
-        const px = d.data;
-        for (let i = 0; i < px.length; i += 4) {
-          const r = px[i], g = px[i + 1], b = px[i + 2];
-          const min = Math.min(r, g, b);
-          const density = 255 - min;          // 0 = white background, high = gold ink
-          if (density < 8) { px[i + 3] = 0; continue; }
-          // Map every ink pixel to a rich gold tone; lighter pixels blend toward highlight gold
-          const t = Math.min(density / 200, 1);
-          px[i]     = Math.round(215 + (255 - 215) * (1 - t));  // R: 215–255
-          px[i + 1] = Math.round(172 + (220 - 172) * (1 - t));  // G: 172–220
-          px[i + 2] = Math.round(58  + (160 - 58)  * (1 - t));  // B: 58–160
-          px[i + 3] = Math.min(255, Math.round(density * 4.8));  // much higher alpha
-        }
-        ctx.putImageData(d, 0, 0);
-        resolve(c.toDataURL('image/png'));
-      };
-      img.onerror = () => resolve(url);
-      img.src = url;
-    });
 
   // ── Certificate download — renders HTML to PNG via html2canvas ────────────
   const downloadAsPng = (html: string, filename: string): Promise<void> => {
