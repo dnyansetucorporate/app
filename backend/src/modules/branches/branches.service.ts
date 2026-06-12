@@ -62,9 +62,9 @@ export const getBranchById = async (id: string) => {
 };
 
 export const createBranch = async (data: CreateBranchDto) => {
-  // Validate unique email before transaction
+  // Only block if an active (non-deleted) user already holds this email
   const existingUser = await prisma.user.findUnique({ where: { email: data.adminEmail } });
-  if (existingUser) {
+  if (existingUser?.isActive) {
     throw Object.assign(new Error('Admin email already exists'), { status: 409 });
   }
 
@@ -76,15 +76,20 @@ export const createBranch = async (data: CreateBranchDto) => {
 
   try {
     return await prisma.$transaction(async (tx: any) => {
-      // Create admin user
-      const admin = await tx.user.create({
-        data: {
-          name:         data.adminName,
-          email:        data.adminEmail,
-          passwordHash,
-          role:         'BRANCH_ADMIN',
-        },
-      });
+      // Reuse inactive user record if email was previously deleted, otherwise create fresh
+      const admin = existingUser
+        ? await tx.user.update({
+            where: { id: existingUser.id },
+            data: { name: data.adminName, passwordHash, isActive: true, role: 'BRANCH_ADMIN' },
+          })
+        : await tx.user.create({
+            data: {
+              name:         data.adminName,
+              email:        data.adminEmail,
+              passwordHash,
+              role:         'BRANCH_ADMIN',
+            },
+          });
 
       // Create branch
       return await tx.branch.create({
@@ -143,5 +148,11 @@ export const softDeleteBranch = async (id: string) => {
       { status: 409 }
     );
   }
-  await prisma.branch.update({ where: { id }, data: { isActive: false } });
+  const branch = await prisma.branch.findUnique({ where: { id }, select: { adminId: true } });
+  await prisma.$transaction([
+    prisma.branch.update({ where: { id }, data: { isActive: false } }),
+    ...(branch?.adminId
+      ? [prisma.user.update({ where: { id: branch.adminId }, data: { isActive: false } })]
+      : []),
+  ]);
 };
