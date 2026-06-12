@@ -5,6 +5,6 @@ import { clearDatabase } from './settings.service.js';
 import type { AuthRequest } from '../../middleware/auth.middleware.js';
 
 export const clearDb = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-  await clearDatabase(req.user!.id);
+  await clearDatabase(req.user!.sub);
   sendSuccess(res, null, 'Database cleared successfully');
 });
