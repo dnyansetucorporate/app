@@ -14,7 +14,10 @@ import {
   ClipboardList,
   ArrowLeft,
   Menu,
+  LogOut,
+  Settings,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/utils/helpers';
 import { PageHeaderProvider, usePageHeader } from '@/contexts/PageHeaderContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -219,12 +222,25 @@ const DashboardLayoutInner: React.FC<{ isActive: (s: string) => boolean }> = ({ 
   const navigate = useNavigate();
   const navItems = user ? getNavItems(user.role) : [];
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/auth/login');
   };
-
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-[#F4F6F8] overflow-hidden">
@@ -242,20 +258,53 @@ const DashboardLayoutInner: React.FC<{ isActive: (s: string) => boolean }> = ({ 
           ))}
         </nav>
 
-        {/* Profile footer - Matches Figma Alexandra Rose style */}
-        <div className="p-4 border-t border-white/5">
-          <div 
-            onClick={handleLogout}
-            className="flex flex-col gap-1 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group relative active:scale-95 text-left"
+        {/* Profile footer with dropdown */}
+        <div className="p-4 border-t border-white/5 relative" ref={userMenuRef}>
+          <div
+            onClick={() => setUserMenuOpen(o => !o)}
+            className="flex flex-col gap-1 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group active:scale-95"
           >
             <p className="text-sm font-bold text-white truncate leading-tight tracking-tight flex items-center justify-between w-full">
-              {user?.name || 'User Name'} <ChevronDown size={14} className="-rotate-90 text-white/30 group-hover:text-white" />
+              {user?.name || 'User Name'}
+              <ChevronDown size={14} className={`text-white/30 group-hover:text-white transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
             </p>
             <p className="text-[10px] font-medium text-white/70 truncate tracking-widest">
               {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Branch Admin'}
             </p>
           </div>
+
+          {userMenuOpen && (
+            <div className="absolute bottom-full left-3 right-3 mb-1 bg-white rounded-xl shadow-xl border border-border overflow-hidden z-50">
+              {user?.role === 'SUPER_ADMIN' && (
+                <button
+                  onClick={() => { setUserMenuOpen(false); navigate('/super-admin/settings'); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Settings size={15} className="text-gray-400" />
+                  Settings
+                </button>
+              )}
+              <button
+                onClick={() => { setUserMenuOpen(false); setLogoutConfirm(true); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut size={15} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
+
+        <ConfirmDialog
+          isOpen={logoutConfirm}
+          title="Logout?"
+          message="Are you sure you want to log out of your account?"
+          confirmText="Logout"
+          cancelText="Cancel"
+          isDangerous={false}
+          onConfirm={handleLogout}
+          onCancel={() => setLogoutConfirm(false)}
+        />
       </aside>
 
       {/* Mobile sidebar drawer */}
@@ -272,7 +321,7 @@ const DashboardLayoutInner: React.FC<{ isActive: (s: string) => boolean }> = ({ 
               ))}
             </nav>
             <div className="mt-6 p-2 border-t border-white/5">
-              <div onClick={() => { setMobileOpen(false); handleLogout(); }} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-white/5 cursor-pointer">
+              <div onClick={() => { setMobileOpen(false); setLogoutConfirm(true); }} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-white/5 cursor-pointer">
                 <div className="flex-1">
                   <p className="text-sm font-bold text-white truncate">{user?.name || 'User Name'}</p>
                   <p className="text-[10px] text-white/70">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Branch Admin'}</p>

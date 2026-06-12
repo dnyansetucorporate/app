@@ -20,6 +20,7 @@ import examRoutes         from './modules/exams/exams.routes.js';
 import certificateRoutes  from './modules/certificates/certificates.routes.js';
 import dashboardRoutes    from './modules/users/dashboard.routes.js';
 import studentPortalRoutes from './modules/student-portal/student-portal.routes.js';
+import settingsRoutes       from './modules/settings/settings.routes.js';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ app.use(`${API}/exams`,        examRoutes);
 app.use(`${API}/certificates`, certificateRoutes);
 app.use(`${API}/dashboard`,    dashboardRoutes);
 app.use(`${API}/student-portal`, studentPortalRoutes);
+app.use(`${API}/settings`,      settingsRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

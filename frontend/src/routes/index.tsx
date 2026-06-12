@@ -15,6 +15,7 @@ const EditBranch = React.lazy(() => import('@/pages/superadmin/EditBranch'));
 const Courses = React.lazy(() => import('@/pages/superadmin/Courses'));
 const Exams = React.lazy(() => import('@/pages/superadmin/Exams'));
 const Certificates = React.lazy(() => import('@/pages/superadmin/Certificates'));
+const SuperAdminSettings = React.lazy(() => import('@/pages/superadmin/Settings'));
 
 // Branch Admin (lazy)
 const AdminDashboard = React.lazy(() => import('@/pages/branch-admin/Dashboard'));
@@ -59,6 +60,7 @@ const AppRoutes: React.FC = () => {
           <Route path="courses" element={<Courses />} />
           <Route path="exams" element={<Exams />} />
           <Route path="certificates" element={<Certificates />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
 
