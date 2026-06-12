@@ -3,7 +3,7 @@ import { sendSuccess } from '../../utils/response.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import {
   listBranches, getBranchStats, getBranchById,
-  createBranch, updateBranch, softDeleteBranch,
+  createBranch, updateBranch, deleteBranch,
 } from './branches.service.js';
 import type { AuthRequest } from '../../middleware/auth.middleware.js';
 
@@ -61,6 +61,6 @@ export const update = asyncHandler(async (req: AuthRequest, res: Response): Prom
 
 // DELETE /api/branches/:id
 export const remove = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-  await softDeleteBranch(req.params.id as string);
+  await deleteBranch(req.params.id as string);
   sendSuccess(res, null, 'Branch deleted successfully');
 });

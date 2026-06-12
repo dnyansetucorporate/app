@@ -62,9 +62,9 @@ export const getBranchById = async (id: string) => {
 };
 
 export const createBranch = async (data: CreateBranchDto) => {
-  // Only block if an active (non-deleted) user already holds this email
+  // Validate unique email before transaction
   const existingUser = await prisma.user.findUnique({ where: { email: data.adminEmail } });
-  if (existingUser?.isActive) {
+  if (existingUser) {
     throw Object.assign(new Error('Admin email already exists'), { status: 409 });
   }
 
@@ -76,20 +76,15 @@ export const createBranch = async (data: CreateBranchDto) => {
 
   try {
     return await prisma.$transaction(async (tx: any) => {
-      // Reuse inactive user record if email was previously deleted, otherwise create fresh
-      const admin = existingUser
-        ? await tx.user.update({
-            where: { id: existingUser.id },
-            data: { name: data.adminName, passwordHash, isActive: true, role: 'BRANCH_ADMIN' },
-          })
-        : await tx.user.create({
-            data: {
-              name:         data.adminName,
-              email:        data.adminEmail,
-              passwordHash,
-              role:         'BRANCH_ADMIN',
-            },
-          });
+      // Create admin user
+      const admin = await tx.user.create({
+        data: {
+          name:         data.adminName,
+          email:        data.adminEmail,
+          passwordHash,
+          role:         'BRANCH_ADMIN',
+        },
+      });
 
       // Create branch
       return await tx.branch.create({
@@ -140,19 +135,24 @@ export const updateBranch = async (id: string, data: UpdateBranchDto) =>
     include: { admin: { select: { id: true, name: true, email: true } } },
   });
 
-export const softDeleteBranch = async (id: string) => {
-  const activeStudents = await prisma.student.count({ where: { branchId: id, isActive: true } });
-  if (activeStudents > 0) {
-    throw Object.assign(
-      new Error(`Cannot deactivate branch with ${activeStudents} active student(s). Deactivate or reassign them first.`),
-      { status: 409 }
-    );
-  }
+export const deleteBranch = async (id: string) => {
   const branch = await prisma.branch.findUnique({ where: { id }, select: { adminId: true } });
-  await prisma.$transaction([
-    prisma.branch.update({ where: { id }, data: { isActive: false } }),
-    ...(branch?.adminId
-      ? [prisma.user.update({ where: { id: branch.adminId }, data: { isActive: false } })]
-      : []),
-  ]);
+  if (!branch) throw Object.assign(new Error('Branch not found'), { status: 404 });
+
+  await prisma.$transaction(async (tx: any) => {
+    // 1. Delete students — cascades: enrollments, payments, exam results,
+    //    exam students, certificates, student credentials, audit logs
+    await tx.student.deleteMany({ where: { branchId: id } });
+
+    // 2. Delete exams — cascades: exam courses
+    await tx.exam.deleteMany({ where: { branchId: id } });
+
+    // 3. Delete the branch — cascades: schedules
+    await tx.branch.delete({ where: { id } });
+
+    // 4. Delete the admin user (safe now that branch is gone)
+    if (branch.adminId) {
+      await tx.user.delete({ where: { id: branch.adminId } });
+    }
+  });
 };
