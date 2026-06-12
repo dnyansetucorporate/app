@@ -264,7 +264,7 @@ const EditBranch: React.FC = () => {
                   </FormField>
 
                   <FormField label="Date of Birth">
-                    <Field name="adminDob" type="date" className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]" />
+                    <Field name="adminDob" type="date" max={new Date().toISOString().split('T')[0]} className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]" />
                   </FormField>
 
                   <FormField label="Phone Number 1" required>

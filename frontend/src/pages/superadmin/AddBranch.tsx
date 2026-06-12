@@ -7,6 +7,7 @@ import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { branchService } from '@/services/branch.service';
 import toast from '@/utils/toastWrapper';
 import { validateImageFile, createPreviewUrl } from '@/utils/imageUtils';
+import { downloadAsPng, branchCertificateHtml } from '@/utils/branchCertificate';
 
 const indianPhoneRegex = /^[6-9]\d{9}$/;
 const aadharRegex = /^\d{12}$/;
@@ -331,6 +332,7 @@ const AddBranch: React.FC = () => {
                       name="adminDob"
                       type="date"
                       placeholder="Enter admin DOB"
+                      max={new Date().toISOString().split('T')[0]}
                       className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]"
                     />
                     <ErrorMessage name="adminDob" component="p" className="text-[#C8102E] text-[12px] mt-1" />
@@ -464,104 +466,16 @@ const AddBranch: React.FC = () => {
             </p>
             <div className="w-full flex flex-col gap-3">
               <button
-                onClick={() => {
-                  if (createdBranch?.certificateUrl) {
-                    const a = document.createElement('a');
-                    a.href = createdBranch.certificateUrl;
-                    a.download = `${createdBranch.name || 'branch'}-certificate.pdf`;
-                    a.click();
-                    return;
+                onClick={async () => {
+                  try {
+                    toast.info?.('Generating certificate…');
+                    await downloadAsPng(
+                      branchCertificateHtml(createdBranch),
+                      `authority-certificate-${(createdBranch?.name || 'branch').replace(/\s+/g, '-')}.png`
+                    );
+                  } catch {
+                    toast.error('Failed to generate certificate');
                   }
-                  // Generate a placeholder certificate using canvas
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 1200;
-                  canvas.height = 850;
-                  const ctx = canvas.getContext('2d')!;
-
-                  // Background
-                  ctx.fillStyle = '#ffffff';
-                  ctx.fillRect(0, 0, 1200, 850);
-
-                  // Outer border
-                  ctx.strokeStyle = '#0A3D4D';
-                  ctx.lineWidth = 12;
-                  ctx.strokeRect(30, 30, 1140, 790);
-
-                  // Inner border
-                  ctx.strokeStyle = '#4DB8CA';
-                  ctx.lineWidth = 4;
-                  ctx.strokeRect(50, 50, 1100, 750);
-
-                  // Header band
-                  ctx.fillStyle = '#0A3D4D';
-                  ctx.fillRect(50, 50, 1100, 110);
-
-                  // Header text
-                  ctx.fillStyle = '#ffffff';
-                  ctx.font = 'bold 42px serif';
-                  ctx.textAlign = 'center';
-                  ctx.fillText('DNYANSETU', 600, 108);
-
-                  // Subtitle
-                  ctx.fillStyle = '#0A3D4D';
-                  ctx.font = '22px serif';
-                  ctx.fillText('BRIDGE TO SUCCESS', 600, 192);
-
-                  // Divider
-                  ctx.strokeStyle = '#4DB8CA';
-                  ctx.lineWidth = 2;
-                  ctx.beginPath();
-                  ctx.moveTo(200, 210);
-                  ctx.lineTo(1000, 210);
-                  ctx.stroke();
-
-                  // Certificate title
-                  ctx.fillStyle = '#C8102E';
-                  ctx.font = 'bold 48px serif';
-                  ctx.fillText('Certificate of Registration', 600, 290);
-
-                  // Body text
-                  ctx.fillStyle = '#1A2332';
-                  ctx.font = '24px serif';
-                  ctx.fillText('This is to certify that the following branch has been', 600, 355);
-                  ctx.fillText('officially registered under the Dnyansetu network.', 600, 390);
-
-                  // Branch name
-                  ctx.fillStyle = '#0A3D4D';
-                  ctx.font = 'bold 40px serif';
-                  ctx.fillText(`"${createdBranch?.name || 'Branch'}"`, 600, 470);
-
-                  // Branch details
-                  ctx.fillStyle = '#64748B';
-                  ctx.font = '20px sans-serif';
-                  if (createdBranch?.branchCode || createdBranch?.branchId) {
-                    ctx.fillText(`Branch ID: ${createdBranch.branchCode || createdBranch.branchId}`, 600, 520);
-                  }
-                  if (createdBranch?.location) {
-                    ctx.fillText(`Location: ${createdBranch.location}`, 600, 552);
-                  }
-                  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-                  ctx.fillText(`Date of Registration: ${today}`, 600, 584);
-
-                  // Divider
-                  ctx.strokeStyle = '#4DB8CA';
-                  ctx.lineWidth = 2;
-                  ctx.beginPath();
-                  ctx.moveTo(200, 630);
-                  ctx.lineTo(1000, 630);
-                  ctx.stroke();
-
-                  // Footer
-                  ctx.fillStyle = '#94A3B8';
-                  ctx.font = '16px sans-serif';
-                  ctx.fillText('Authorized by Dnyansetu Administration', 600, 668);
-                  ctx.fillText('This certificate is computer generated and is valid without signature.', 600, 698);
-
-                  // Trigger download
-                  const link = document.createElement('a');
-                  link.download = `${createdBranch?.name || 'branch'}-certificate.png`;
-                  link.href = canvas.toDataURL('image/png');
-                  link.click();
                 }}
                 className="w-full h-12 flex items-center justify-center gap-2 bg-[#C8102E] text-white rounded-md font-medium text-[15px] hover:bg-red-800 transition-colors"
               >

@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Eye, Plus, X, Maximize, Pencil } from 'lucide-react';
+import { Search, Eye, Plus, X, Maximize, Pencil, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
@@ -93,6 +93,8 @@ const AllBranches: React.FC = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [meta, setMeta] = useState<Meta>({ total: 0, page: 1, limit: LIMIT, totalPages: 1 });
   const [stats, setStats] = useState({ totalBranches: 0, totalStudents: 0 });
+  const [deleteTarget, setDeleteTarget] = useState<Branch | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { setPageHeader } = usePageHeader();
 
   useEffect(() => {
@@ -136,6 +138,22 @@ const AllBranches: React.FC = () => {
       toast.error('Failed to load branch details');
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await branchService.remove(deleteTarget.id);
+      toast.success('Branch deleted successfully');
+      setDeleteTarget(null);
+      fetchBranches(currentPage, search);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete branch');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -246,6 +264,13 @@ const AllBranches: React.FC = () => {
                         >
                           <Pencil size={16} />
                         </button>
+                        <button
+                          onClick={() => setDeleteTarget(b)}
+                          title="Delete"
+                          className="text-[#C8102E] border border-[#C8102E] rounded-[4px] p-1.5 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -297,6 +322,36 @@ const AllBranches: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[18px] font-bold text-[#1A2332]">Delete Branch</h3>
+              <p className="text-[14px] text-[#64748B]">
+                Are you sure you want to delete branch <span className="font-semibold text-[#1A2332]">{deleteTarget.branchCode} — {deleteTarget.name || deleteTarget.location}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="px-5 py-2.5 text-[14px] font-medium text-[#64748B] border border-[#E2E8F0] rounded-[6px] hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-5 py-2.5 text-[14px] font-medium text-white bg-[#C8102E] rounded-[6px] hover:bg-red-800 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Branch Details Modal */}
       {showDetail && (
