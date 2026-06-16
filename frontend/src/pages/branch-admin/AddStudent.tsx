@@ -711,6 +711,7 @@ const AddStudent: React.FC = () => {
                           <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">#</th>
                           <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Amount Paid</th>
                           <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Date</th>
+                          <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Next Installment</th>
                           <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Receipt</th>
                         </tr>
                       </thead>
@@ -719,9 +720,16 @@ const AddStudent: React.FC = () => {
                           <tr key={p.id} className="hover:bg-[#F8FAFC]">
                             <td className="px-4 py-2.5 text-[#64748B]">{idx + 1}</td>
                             <td className="px-4 py-2.5 font-semibold text-[#008A27]">₹{p.feeTaken.toLocaleString('en-IN')}</td>
-                            <td className="px-4 py-2.5 text-[#64748B] flex items-center gap-1.5">
-                              <Clock size={12} className="text-[#94A3B8]" />
-                              {new Date(p.paidAt || p.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            <td className="px-4 py-2.5 text-[#64748B]">
+                              <div className="flex items-center gap-1.5">
+                                <Clock size={12} className="text-[#94A3B8]" />
+                                {new Date(p.paidAt || p.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </div>
+                            </td>
+                            <td className="px-4 py-2.5 text-[#64748B]">
+                              {p.nextInstallmentDate
+                                ? new Date(p.nextInstallmentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                : <span className="text-[#CBD5E1]">—</span>}
                             </td>
                             <td className="px-4 py-2.5">
                               <button
@@ -748,45 +756,49 @@ const AddStudent: React.FC = () => {
                   <p className="text-[13px] text-[#008A27] font-medium">All fees have been paid in full. No further payment is required.</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[14px] font-semibold text-[#1A2332]">
-                      Record New Payment <span className="text-[12px] font-normal text-[#64748B]">(remaining: ₹{remaining.toLocaleString('en-IN')})</span>
-                    </label>
-                    <div className="relative max-w-xs">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#64748B] font-medium">₹</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max={remaining}
-                        value={newPaymentAmount}
-                        onChange={(e) => {
-                          setNewPaymentAmount(e.target.value);
-                          setPaymentAmountError('');
-                          if (Number(e.target.value) >= remaining) setNewPaymentNextDate('');
-                        }}
-                        placeholder="Enter amount"
-                        className={`w-full h-11 pl-8 pr-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA] ${paymentAmountError ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`}
-                      />
+                <div className="flex flex-col gap-3">
+                  <label className="text-[14px] font-semibold text-[#1A2332]">
+                    Record New Payment <span className="text-[12px] font-normal text-[#64748B]">(remaining: ₹{remaining.toLocaleString('en-IN')})</span>
+                  </label>
+                  <div className="flex items-start gap-3 flex-wrap">
+                    {/* Amount */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[12px] text-[#64748B]">Amount</label>
+                      <div className="relative w-48">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#64748B] font-medium">₹</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max={remaining}
+                          value={newPaymentAmount}
+                          onChange={(e) => {
+                            setNewPaymentAmount(e.target.value);
+                            setPaymentAmountError('');
+                            if (Number(e.target.value) >= remaining) setNewPaymentNextDate('');
+                          }}
+                          placeholder="Enter amount"
+                          className={`w-full h-11 pl-8 pr-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA] ${paymentAmountError ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`}
+                        />
+                      </div>
+                      {paymentAmountError && <p className="text-[12px] text-[#C8102E]">{paymentAmountError}</p>}
                     </div>
-                    {paymentAmountError && <p className="text-[12px] text-[#C8102E]">{paymentAmountError}</p>}
-                    <p className="text-[11px] text-[#94A3B8]">Leave blank if no payment is being recorded now.</p>
-                  </div>
 
-                  {/* Next installment date — shown only when the new payment won't clear the balance */}
-                  {Number(newPaymentAmount) > 0 && Number(newPaymentAmount) < remaining && (
-                    <div className="flex flex-col gap-2 max-w-xs">
-                      <label className="text-[14px] font-semibold text-[#1A2332]">
-                        Next Installment Date <span className="text-[#C8102E]">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        value={newPaymentNextDate}
-                        onChange={(e) => setNewPaymentNextDate(e.target.value)}
-                        className="w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA]"
-                      />
-                    </div>
-                  )}
+                    {/* Next installment date — shown inline when payment is partial */}
+                    {Number(newPaymentAmount) > 0 && Number(newPaymentAmount) < remaining && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[12px] text-[#64748B]">
+                          Next Installment Date <span className="text-[#C8102E]">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          value={newPaymentNextDate}
+                          onChange={(e) => setNewPaymentNextDate(e.target.value)}
+                          className="h-11 px-4 bg-white border border-[#E2E8F0] rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA]"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#94A3B8]">Leave blank if no payment is being recorded now.</p>
                 </div>
               )}
             </div>
