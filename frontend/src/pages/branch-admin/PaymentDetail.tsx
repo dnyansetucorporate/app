@@ -356,6 +356,11 @@ export const PaymentDetail: React.FC = () => {
 
           {/* ── Note + Signature area (flex:1 pushes footer to bottom of A4) ── */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 30px 40px 30px', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: '13px', fontWeight: 400, color: '#1F2937', letterSpacing: '0.2px' }}>
+                DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA
+              </span>
+            </div>
             <div style={{
               padding: '10px 14px',
               background: '#FEF3C7',
@@ -366,11 +371,6 @@ export const PaymentDetail: React.FC = () => {
               fontStyle: 'italic',
             }}>
               <strong>Note:</strong> Fees once paid is not refundable at any reason.
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <span style={{ fontSize: '13px', fontWeight: 400, color: '#1F2937', letterSpacing: '0.2px' }}>
-                DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA
-              </span>
             </div>
           </div>
 
