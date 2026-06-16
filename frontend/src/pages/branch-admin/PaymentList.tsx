@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Eye, Trash2, Search, CreditCard } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { paymentService } from '@/services/payment.service';
 import { TableSkeleton } from '@/components/SkeletonLoader';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { PaymentStatusBadge } from '@/components/ui/PaymentStatusBadge';
+import { Pagination } from '@/components/ui/Pagination';
+import { useSearchDebounce } from '@/hooks/useSearchDebounce';
+import { formatDate } from '@/utils/helpers';
 
 interface Payment {
   id: string;
@@ -29,12 +33,12 @@ export const PaymentList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  const { searchInput, setSearchInput, searchTerm } = useSearchDebounce(setPage);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -56,19 +60,10 @@ export const PaymentList: React.FC = () => {
     }
   };
 
-  // Debounce: update searchTerm + reset page TOGETHER after 400ms
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setPage(1);
-      setSearchTerm(searchInput);
-    }, 400);
-    return () => clearTimeout(t);
-  }, [searchInput]);
-
   useEffect(() => {
     fetchPayments();
     return () => { abortControllerRef.current?.abort(); };
-  }, [page, limit, searchTerm, statusFilter]);
+  }, [page, limit, searchTerm, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true);
@@ -83,38 +78,6 @@ export const PaymentList: React.FC = () => {
     } finally {
       setIsDeleting(false);
     }
-  };
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'FULL_PAID':
-        return 'border border-[#00A925] text-[#00A925] bg-white';
-      case 'PARTIAL_PAID':
-        return 'border border-[#EAB308] text-[#EAB308] bg-white';
-      case 'PENDING':
-        return 'border border-[#64748B] text-[#64748B] bg-white';
-      default:
-        return 'border border-[#64748B] text-[#64748B] bg-white';
-    }
-  };
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'FULL_PAID': return 'Full Paid';
-      case 'PARTIAL_PAID': return 'Partial Paid';
-      case 'PENDING': return 'Pending';
-      default: return status;
-    }
-  };
-
-  const getStudentName = (payment: Payment) => {
-    if (payment.enrollment?.student) {
-      return `${payment.enrollment.student.firstName || ''} ${payment.enrollment.student.lastName || ''}`.trim();
-    }
-    return 'N/A';
-  };
-
-  const getCourseName = (payment: Payment) => {
-    return payment.enrollment?.course?.name || 'N/A';
   };
 
   if (loading) return <TableSkeleton />;
@@ -136,7 +99,9 @@ export const PaymentList: React.FC = () => {
       <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <svg className="absolute left-3 top-3 text-gray-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
             <input
               type="text"
               placeholder="Search by student name, course, email..."
@@ -147,10 +112,7 @@ export const PaymentList: React.FC = () => {
           </div>
           <select
             value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
@@ -167,10 +129,7 @@ export const PaymentList: React.FC = () => {
           icon={CreditCard}
           title="No payments found"
           description="Start by recording a payment for a course enrollment or adjust your filters"
-          action={{
-            label: 'Record Payment',
-            onClick: () => navigate('create'),
-          }}
+          action={{ label: 'Record Payment', onClick: () => navigate('create') }}
         />
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -191,52 +150,24 @@ export const PaymentList: React.FC = () => {
                 <tr key={payment.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {getStudentName(payment)}
+                      {payment.enrollment?.student
+                        ? `${payment.enrollment.student.firstName || ''} ${payment.enrollment.student.lastName || ''}`.trim()
+                        : 'N/A'}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {payment.enrollment?.student?.email}
-                    </div>
+                    <div className="text-xs text-gray-500">{payment.enrollment?.student?.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {getCourseName(payment)}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-blue-600">
-                    ₹{Number(payment.feeTaken).toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    ₹{Number(payment.courseFee).toFixed(2)}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{payment.enrollment?.course?.name || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-blue-600">₹{Number(payment.feeTaken).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">₹{Number(payment.courseFee).toFixed(2)}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-[4px] text-[12px] font-medium ${getStatusBadgeColor(payment.paymentStatus)}`}>
-                      {getStatusLabel(payment.paymentStatus)}
-                    </span>
+                    <PaymentStatusBadge status={payment.paymentStatus} />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(payment.createdAt).toLocaleDateString()}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{formatDate(payment.createdAt)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => navigate(`detail/${payment.id}`)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                        title="View"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        onClick={() => navigate(`edit/${payment.id}`)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                        title="Edit"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(payment.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <button onClick={() => navigate(`detail/${payment.id}`)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="View"><Eye size={16} /></button>
+                      <button onClick={() => navigate(`edit/${payment.id}`)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition" title="Edit"><Edit2 size={16} /></button>
+                      <button onClick={() => setDeleteId(payment.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </td>
                 </tr>
@@ -246,30 +177,8 @@ export const PaymentList: React.FC = () => {
         </div>
       )}
 
-      {/* Pagination */}
-      {payments.length > 0 && (
-        <div className="flex items-center justify-center gap-2 bg-white rounded-lg p-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-gray-600">
-            Page {page} of {Math.ceil(total / limit)}
-          </span>
-          <button
-            disabled={page * limit >= total}
-            onClick={() => setPage(p => p + 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} total={total} limit={limit} onPage={setPage} />
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={!!deleteId}
         title="Delete Payment"

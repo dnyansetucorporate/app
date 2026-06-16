@@ -2,8 +2,7 @@
  * Utility functions for handling image URLs and file validation
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const FILE_BASE = API_URL.replace(/\/api\/?$/i, '');
+import { FILE_BASE } from '@/utils/constants';
 
 /**
  * Convert a relative or absolute image path to a full URL for display

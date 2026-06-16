@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
@@ -11,7 +11,7 @@ import {
   Cell,
   CartesianGrid,
 } from 'recharts';
-import { Search, Eye, Edit2, ChevronLeft, ChevronDown, X, Maximize, Loader2 } from 'lucide-react';
+import { Search, Eye, Edit2, ChevronLeft, ChevronDown, X, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { computeComparisonDates } from '@/contexts/PageHeaderContext';
@@ -20,6 +20,8 @@ import { branchService } from '@/services/branch.service';
 import { studentService } from '@/services/student.service';
 import { useNavigate } from 'react-router-dom';
 import toast from '@/utils/toastWrapper';
+import { PaymentStatusBadge } from '@/components/ui/PaymentStatusBadge';
+import { StudentDetailDrawer } from '@/components/StudentDetailDrawer';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -157,35 +159,6 @@ const SuperAdminDashboard: React.FC = () => {
     }
   };
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  const FILE_BASE = API_URL.replace(/\/api\/?$/i, '');
-
-  const getPhotoUrl = (p?: string | null): string | null => {
-    if (!p) return null;
-    if (/^https?:\/\//i.test(p)) return p;
-    return `${FILE_BASE}/${String(p).replace(/^\/+/, '')}`;
-  };
-
-  const PaymentBadge = ({ status }: { status: string }) => {
-    const isFullPaid = status === 'FULL_PAID';
-    const isPartialPaid = status === 'PARTIAL_PAID';
-    const label = isFullPaid ? 'Full Paid' : isPartialPaid ? 'Partial Paid' : 'Pending';
-    return (
-      <span
-        className={cn(
-          'px-3 py-1 text-[12px] font-medium border rounded',
-          isFullPaid
-            ? 'text-[#00875A] border-[#ABF2D1] bg-white'
-            : isPartialPaid
-            ? 'text-[#EAB308] border-[#EAB308] bg-white'
-            : 'text-[#64748B] border-[#CBD5E1] bg-white'
-        )}
-      >
-        {label}
-      </span>
-    );
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-20 min-h-[48vh]">
@@ -255,9 +228,7 @@ const SuperAdminDashboard: React.FC = () => {
         {/* Active Students */}
         <div className="bg-white rounded-[12px] border border-[#E2E8F0] p-6 flex flex-col gap-3">
           <p className="text-[14px] text-[#64748B]">Active Students</p>
-          <p className="text-[28px] font-bold text-[#1A2332] leading-none">
-            {totalStudents}
-          </p>
+          <p className="text-[28px] font-bold text-[#1A2332] leading-none">{totalStudents}</p>
           <p className="text-[12px] text-[#64748B]">Total active students</p>
         </div>
 
@@ -350,14 +321,7 @@ const SuperAdminDashboard: React.FC = () => {
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#1A2332', fontWeight: 500 }} dy={12} />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#64748B' }}
-                  domain={[0, (dataMax: number) => Math.max(dataMax + Math.ceil(dataMax * 0.2), 5)]}
-                  allowDecimals={false}
-                  tickCount={6}
-                />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} domain={[0, (dataMax: number) => Math.max(dataMax + Math.ceil(dataMax * 0.2), 5)]} allowDecimals={false} tickCount={6} />
                 <CartesianGrid vertical={false} stroke="#F1F5F9" />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F8FAFC' }} />
                 <Bar dataKey="value" fill="url(#saBarGradient)" radius={[4, 4, 0, 0]} />
@@ -420,7 +384,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <td className="py-4 px-5 text-[14px] text-[#1A2332]">{s.phone}</td>
                     <td className="py-4 px-5 text-[14px] text-[#1A2332]">{s.enrollments?.[0]?.course?.name || 'N/A'}</td>
                     <td className="py-4 px-5 text-[14px]">
-                      <PaymentBadge status={s.enrollments?.[0]?.paymentStatus || 'PENDING'} />
+                      <PaymentStatusBadge status={s.enrollments?.[0]?.paymentStatus || 'PENDING'} />
                     </td>
                     <td className="py-4 px-5 text-center">
                       <div className="flex justify-center gap-2">
@@ -458,27 +422,12 @@ const SuperAdminDashboard: React.FC = () => {
                   Showing data {from} to {to} of {total} Students
                 </p>
                 <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm"
-                  >&lt;</button>
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm">&lt;</button>
                   {pages.map(p => (
-                    <button
-                      key={p}
-                      onClick={() => setCurrentPage(p)}
-                      className={cn(
-                        'w-8 h-8 flex items-center justify-center rounded text-[13px] transition-colors',
-                        p === currentPage ? 'bg-[#0A3D4D] text-white' : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-gray-50'
-                      )}
-                    >{p}</button>
+                    <button key={p} onClick={() => setCurrentPage(p)} className={cn('w-8 h-8 flex items-center justify-center rounded text-[13px] transition-colors', p === currentPage ? 'bg-[#0A3D4D] text-white' : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-gray-50')}>{p}</button>
                   ))}
                   {totalPages > 4 && <span className="px-1 text-[#94A3B8]">...</span>}
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage >= totalPages}
-                    className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm"
-                  >&gt;</button>
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm">&gt;</button>
                 </div>
               </>
             );
@@ -529,81 +478,11 @@ const SuperAdminDashboard: React.FC = () => {
 
       {/* Student Detail Drawer */}
       {showStudentDetail && selectedStudent && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => { setShowStudentDetail(false); setSelectedStudent(null); }}>
-          <div className="bg-white w-full max-w-lg h-full overflow-y-auto flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-8 py-6 bg-white border-b border-[#E2E8F0] sticky top-0 z-10">
-              <h3 className="font-semibold text-[18px] text-[#1A2332]">View Student Details</h3>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setShowStudentDetail(false); navigate(`/super-admin/edit-student/${selectedStudent.id}`); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-[#4DB8CA] text-[#4DB8CA] rounded-[6px] text-[13px] font-medium hover:bg-[#E6F6F9] transition-colors"
-                >
-                  <Edit2 size={14} />
-                  Edit
-                </button>
-                <button onClick={() => { setShowStudentDetail(false); setSelectedStudent(null); }} className="text-[#64748B] hover:text-[#1A2332] transition-colors"><X size={20} /></button>
-              </div>
-            </div>
-            <div className="p-8 flex flex-col gap-6">
-              {(() => {
-                const photoUrl = getPhotoUrl(selectedStudent.photo);
-                const initials = [selectedStudent.firstName, selectedStudent.lastName]
-                  .filter(Boolean)
-                  .map((n: string) => n[0].toUpperCase())
-                  .join('') || '?';
-                return (
-                  <div className="relative w-32 h-32">
-                    {photoUrl ? (
-                      <img
-                        src={photoUrl}
-                        className="w-full h-full rounded-[16px] object-cover"
-                        alt="Student"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          const sibling = e.currentTarget.nextElementSibling as HTMLElement;
-                          if (sibling) sibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="w-full h-full rounded-[16px] bg-[#E6F0FA] flex items-center justify-center text-[#1A2332] text-3xl font-bold select-none"
-                      style={{ display: photoUrl ? 'none' : 'flex' }}
-                    >
-                      {initials}
-                    </div>
-                    {photoUrl && (
-                      <div
-                        onClick={() => window.open(photoUrl, '_blank', 'noopener,noreferrer')}
-                        className="absolute bottom-2 right-2 bg-black/50 p-1.5 rounded-[4px] cursor-pointer hover:bg-black/70 transition-colors"
-                      >
-                        <Maximize size={12} className="text-white" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-              <div className="flex flex-col gap-5">
-                {[
-                  { label: 'Student ID', value: selectedStudent.prn },
-                  { label: 'Admission Date', value: (() => { const d = selectedStudent.enrollments?.[0]?.enrolledAt || selectedStudent.createdAt; return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : undefined; })() },
-                  { label: 'Student Name', value: `${selectedStudent.firstName || ''} ${selectedStudent.lastName || ''}`.trim() },
-                  { label: 'Phone Number', value: selectedStudent.phone },
-                  { label: 'Email ID', value: selectedStudent.email },
-                  { label: 'Address', value: selectedStudent.address },
-                  { label: 'Selected Courses', value: selectedStudent.enrollments?.map((e: any) => e.course?.name).join(', ') || 'N/A' },
-                  { label: 'Payment Status', value: selectedStudent.enrollments?.[0]?.paymentStatus || 'N/A' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex flex-col gap-2">
-                    <label className="text-[14px] font-semibold text-[#1A2332]">{label}</label>
-                    <div className="px-4 py-3 bg-white border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#1A2332] min-h-[46px] flex items-center">
-                      {value || '—'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <StudentDetailDrawer
+          student={selectedStudent}
+          onClose={() => { setShowStudentDetail(false); setSelectedStudent(null); }}
+          onEdit={() => { setShowStudentDetail(false); navigate(`/super-admin/edit-student/${selectedStudent.id}`); }}
+        />
       )}
     </div>
   );
