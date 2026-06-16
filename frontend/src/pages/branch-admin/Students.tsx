@@ -182,9 +182,14 @@ const Students: React.FC = () => {
       </table>
     </div>
 
-    <!-- Spacer + Signature -->
-    <div style="flex:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:16px 30px 40px 30px;">
-      <span style="font-size:13px;font-weight:400;color:#1F2937;letter-spacing:0.2px;">DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA</span>
+    <!-- Note + Signature -->
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 30px 40px 30px;gap:12px;">
+      <div style="padding:10px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:4px;font-size:12px;color:#92400E;font-style:italic;">
+        <strong>Note:</strong> Fees once paid is not refundable at any reason.
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <span style="font-size:13px;font-weight:400;color:#1F2937;letter-spacing:0.2px;">DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA</span>
+      </div>
     </div>
 
   </div><!-- end .content -->
@@ -288,27 +293,35 @@ const Students: React.FC = () => {
                       })()}
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center justify-center gap-2">
-                        <button 
-                          className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
-                          onClick={() => openStudent(s.id)}
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button 
-                          className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
-                          onClick={() => navigate(`/branch-admin/edit-student/${s.id}`)}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
-                          onClick={() => handleQuickPrintFromTable(String(s.id))}
-                          title="Print latest receipt"
-                        >
-                          <Printer size={16} />
-                        </button>
-                      </div>
+                      {(() => {
+                        const ps = s.status || s.enrollments?.[0]?.paymentStatus || 'PENDING';
+                        const isFullPaid = ps === 'FULL_PAID';
+                        return (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
+                              onClick={() => openStudent(s.id)}
+                            >
+                              <Eye size={16} />
+                            </button>
+                            {!isFullPaid && (
+                              <button
+                                className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
+                                onClick={() => navigate(`/branch-admin/edit-student/${s.id}`)}
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                            )}
+                            <button
+                              className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
+                              onClick={() => handleQuickPrintFromTable(String(s.id))}
+                              title="Print latest receipt"
+                            >
+                              <Printer size={16} />
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))

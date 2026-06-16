@@ -11,13 +11,14 @@ import {
   Cell,
   CartesianGrid,
 } from 'recharts';
-import { Search, Eye, ChevronLeft, ChevronDown, X, Maximize, Loader2 } from 'lucide-react';
+import { Search, Eye, Edit2, ChevronLeft, ChevronDown, X, Maximize, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { computeComparisonDates } from '@/contexts/PageHeaderContext';
 import { dashboardService } from '@/services/dashboard.service';
 import { branchService } from '@/services/branch.service';
 import { studentService } from '@/services/student.service';
+import { useNavigate } from 'react-router-dom';
 import toast from '@/utils/toastWrapper';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -39,6 +40,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const SuperAdminDashboard: React.FC = () => {
   const { setPageHeader, sortBy, dateFrom, dateTo } = usePageHeader();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [prevStats, setPrevStats] = useState<any>(null);
   const [performance, setPerformance] = useState<any[]>([]);
@@ -158,9 +160,8 @@ const SuperAdminDashboard: React.FC = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const FILE_BASE = API_URL.replace(/\/api\/?$/i, '');
 
-  const getPhotoUrl = (p?: string | null) => {
-    const fallback = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&auto=format';
-    if (!p) return fallback;
+  const getPhotoUrl = (p?: string | null): string | null => {
+    if (!p) return null;
     if (/^https?:\/\//i.test(p)) return p;
     return `${FILE_BASE}/${String(p).replace(/^\/+/, '')}`;
   };
@@ -422,12 +423,18 @@ const SuperAdminDashboard: React.FC = () => {
                       <PaymentBadge status={s.enrollments?.[0]?.paymentStatus || 'PENDING'} />
                     </td>
                     <td className="py-4 px-5 text-center">
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-2">
                         <button
                           onClick={() => fetchStudentDetail(s.id)}
                           className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
                         >
                           <Eye size={15} />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/super-admin/edit-student/${s.id}`)}
+                          className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
+                        >
+                          <Edit2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -521,35 +528,75 @@ const SuperAdminDashboard: React.FC = () => {
       )}
 
       {/* Student Detail Drawer */}
-      {showStudentDetail && (
+      {showStudentDetail && selectedStudent && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => { setShowStudentDetail(false); setSelectedStudent(null); }}>
           <div className="bg-white w-full max-w-lg h-full overflow-y-auto flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-8 py-6 bg-white border-b border-[#E2E8F0] sticky top-0 z-10">
               <h3 className="font-semibold text-[18px] text-[#1A2332]">View Student Details</h3>
-              <button onClick={() => { setShowStudentDetail(false); setSelectedStudent(null); }} className="text-[#64748B] hover:text-[#1A2332] transition-colors"><X size={20} /></button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { setShowStudentDetail(false); navigate(`/super-admin/edit-student/${selectedStudent.id}`); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-[#4DB8CA] text-[#4DB8CA] rounded-[6px] text-[13px] font-medium hover:bg-[#E6F6F9] transition-colors"
+                >
+                  <Edit2 size={14} />
+                  Edit
+                </button>
+                <button onClick={() => { setShowStudentDetail(false); setSelectedStudent(null); }} className="text-[#64748B] hover:text-[#1A2332] transition-colors"><X size={20} /></button>
+              </div>
             </div>
             <div className="p-8 flex flex-col gap-6">
-              <div className="relative w-36 h-36">
-                <img src={getPhotoUrl(selectedStudent?.photo)} className="w-full h-full rounded-[16px] object-cover" alt="Student" />
-                <div className="absolute bottom-2 right-2 bg-black/50 p-1.5 rounded-[4px] cursor-pointer hover:bg-black/70 transition-colors">
-                  <Maximize size={12} className="text-white" />
-                </div>
-              </div>
+              {(() => {
+                const photoUrl = getPhotoUrl(selectedStudent.photo);
+                const initials = [selectedStudent.firstName, selectedStudent.lastName]
+                  .filter(Boolean)
+                  .map((n: string) => n[0].toUpperCase())
+                  .join('') || '?';
+                return (
+                  <div className="relative w-32 h-32">
+                    {photoUrl ? (
+                      <img
+                        src={photoUrl}
+                        className="w-full h-full rounded-[16px] object-cover"
+                        alt="Student"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          const sibling = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (sibling) sibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-full h-full rounded-[16px] bg-[#E6F0FA] flex items-center justify-center text-[#1A2332] text-3xl font-bold select-none"
+                      style={{ display: photoUrl ? 'none' : 'flex' }}
+                    >
+                      {initials}
+                    </div>
+                    {photoUrl && (
+                      <div
+                        onClick={() => window.open(photoUrl, '_blank', 'noopener,noreferrer')}
+                        className="absolute bottom-2 right-2 bg-black/50 p-1.5 rounded-[4px] cursor-pointer hover:bg-black/70 transition-colors"
+                      >
+                        <Maximize size={12} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="flex flex-col gap-5">
                 {[
-                  { label: 'Student ID', value: selectedStudent?.prn },
-                  { label: 'Admission Date', value: selectedStudent?.admissionDate && new Date(selectedStudent.admissionDate).toLocaleDateString() },
-                  { label: 'Student Name', value: `${selectedStudent?.firstName || ''} ${selectedStudent?.lastName || ''}`.trim() },
-                  { label: 'Phone Number', value: selectedStudent?.phone },
-                  { label: 'Email ID', value: selectedStudent?.email },
-                  { label: 'Address', value: selectedStudent?.address },
-                  { label: 'Selected Courses', value: selectedStudent?.enrollments?.map((e: any) => e.course?.name).join(', ') },
-                  { label: 'Payment Status', value: selectedStudent?.enrollments?.[0]?.paymentStatus },
+                  { label: 'Student ID', value: selectedStudent.prn },
+                  { label: 'Admission Date', value: (() => { const d = selectedStudent.enrollments?.[0]?.enrolledAt || selectedStudent.createdAt; return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : undefined; })() },
+                  { label: 'Student Name', value: `${selectedStudent.firstName || ''} ${selectedStudent.lastName || ''}`.trim() },
+                  { label: 'Phone Number', value: selectedStudent.phone },
+                  { label: 'Email ID', value: selectedStudent.email },
+                  { label: 'Address', value: selectedStudent.address },
+                  { label: 'Selected Courses', value: selectedStudent.enrollments?.map((e: any) => e.course?.name).join(', ') || 'N/A' },
+                  { label: 'Payment Status', value: selectedStudent.enrollments?.[0]?.paymentStatus || 'N/A' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-2">
                     <label className="text-[14px] font-semibold text-[#1A2332]">{label}</label>
                     <div className="px-4 py-3 bg-white border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#1A2332] min-h-[46px] flex items-center">
-                      {value ?? '—'}
+                      {value || '—'}
                     </div>
                   </div>
                 ))}

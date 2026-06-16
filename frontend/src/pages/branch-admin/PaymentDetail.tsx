@@ -354,11 +354,24 @@ export const PaymentDetail: React.FC = () => {
             </table>
           </div>
 
-          {/* ── Signature area (flex:1 pushes footer to bottom of A4) ── */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '16px 30px 40px 30px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 400, color: '#1F2937', letterSpacing: '0.2px' }}>
-              DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA
-            </span>
+          {/* ── Note + Signature area (flex:1 pushes footer to bottom of A4) ── */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 30px 40px 30px', gap: '12px' }}>
+            <div style={{
+              padding: '10px 14px',
+              background: '#FEF3C7',
+              border: '1px solid #FCD34D',
+              borderRadius: '4px',
+              fontSize: '12px',
+              color: '#92400E',
+              fontStyle: 'italic',
+            }}>
+              <strong>Note:</strong> Fees once paid is not refundable at any reason.
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: '13px', fontWeight: 400, color: '#1F2937', letterSpacing: '0.2px' }}>
+                DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA
+              </span>
+            </div>
           </div>
 
           {/* ── Footer (always at A4 bottom) ── */}

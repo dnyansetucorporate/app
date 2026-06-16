@@ -21,6 +21,7 @@ const SuperAdminSettings = React.lazy(() => import('@/pages/superadmin/Settings'
 const AdminDashboard = React.lazy(() => import('@/pages/branch-admin/Dashboard'));
 const AllStudents = React.lazy(() => import('@/pages/branch-admin/Students'));
 const AddStudent = React.lazy(() => import('@/pages/branch-admin/AddStudent'));
+const EditStudentSuperAdmin = React.lazy(() => import('@/pages/branch-admin/AddStudent'));
 const ScheduleExam = React.lazy(() => import('@/pages/branch-admin/ScheduleExam'));
 const ExamResults = React.lazy(() => import('@/pages/branch-admin/ExamResults'));
 const PaymentList = React.lazy(() => import('@/pages/branch-admin/PaymentList'));
@@ -61,6 +62,7 @@ const AppRoutes: React.FC = () => {
           <Route path="exams" element={<Exams />} />
           <Route path="certificates" element={<Certificates />} />
           <Route path="settings" element={<SuperAdminSettings />} />
+          <Route path="edit-student/:id" element={<EditStudentSuperAdmin />} />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
 
