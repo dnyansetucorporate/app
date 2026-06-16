@@ -3,6 +3,7 @@ import { Plus, ChevronDown, Image as ImageIcon, Loader2, CheckCircle2, Clock, Ro
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import toast from '@/utils/toastWrapper';
 import { buildImageUrl, validateImageFile, createPreviewUrl } from '@/utils/imageUtils';
+import { getInvoiceNumber, buildInstallments, openPrintInvoice } from '@/utils/invoiceUtils';
 import { courseService } from '@/services/course.service';
 import { studentService } from '@/services/student.service';
 import { paymentService } from '@/services/payment.service';
@@ -33,6 +34,7 @@ const AddStudent: React.FC = () => {
     payments: Array<{ id: string; feeTaken: number; paidAt: string | null; createdAt: string; nextInstallmentDate?: string | null }>;
   } | null>(null);
   const [newPaymentAmount, setNewPaymentAmount] = useState('');
+  const [newPaymentNextDate, setNewPaymentNextDate] = useState('');
   const [paymentAmountError, setPaymentAmountError] = useState('');
   const [branchInfo, setBranchInfo] = useState<{ name: string; address: string; location: string; phone1: string; adminEmail: string } | null>(null);
 
@@ -239,150 +241,24 @@ const AddStudent: React.FC = () => {
   };
 
   const handlePrintReceipt = (payment: { id: string; feeTaken: number; paidAt: string | null; createdAt: string; nextInstallmentDate?: string | null }) => {
-    const receiptWindow = window.open('', '_blank', 'width=860,height=1100');
-    if (!receiptWindow) {
-      toast.error('Unable to open print window. Please allow popups for this site.');
-      return;
-    }
-
-    const origin = window.location.origin;
-    const totalFee = Number(enrollment?.courseFee || 0);
-    const sortedPayments = [...(enrollment?.payments || [])].sort(
-      (a, b) => new Date(a.paidAt || a.createdAt).getTime() - new Date(b.paidAt || b.createdAt).getTime()
-    );
-    const courseName = courses.find((c) => c.id === formData.courseId)?.name || 'N/A';
-    const studentName = `${formData.firstName} ${formData.middleName ? formData.middleName + ' ' : ''}${formData.lastName}`.trim();
-
-    const fmtDate = (d: string | null | undefined): string => {
-      if (!d) return '';
-      const dt = new Date(d);
-      if (isNaN(dt.getTime())) return '';
-      return `${dt.getFullYear()}-${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-    };
-
-    const invoiceNo = (() => {
-      let h = 0;
-      for (let i = 0; i < payment.id.length; i++) h = ((h << 5) - h + payment.id.charCodeAt(i)) | 0;
-      return String((Math.abs(h) % 9000) + 1000);
-    })();
-
-    let cum = 0;
-    const tableRows = sortedPayments.map((p, i) => {
-      cum += Number(p.feeTaken || 0);
-      const rem = Math.max(0, totalFee - cum);
-      return `<tr>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${i + 1}</td>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${fmtDate(p.paidAt || p.createdAt)}</td>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${Number(p.feeTaken || 0).toLocaleString('en-IN')}</td>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${rem.toLocaleString('en-IN')}</td>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${p.nextInstallmentDate ? fmtDate(p.nextInstallmentDate) : ''}</td>
-      </tr>`;
-    }).join('');
-
-    const emptyRow = tableRows ? '' : `<tr><td colspan="5" style="padding:32px 16px;text-align:center;font-size:13px;color:#9CA3AF;border:1px solid #dce8ee;">No payment records</td></tr>`;
-
-    receiptWindow.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <title>Invoice - ${invoiceNo}</title>
-  <meta charset="utf-8">
-  <style>
-    @page { size: A4 portrait; margin: 0; }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-    html, body { width: 210mm; margin: 0 auto; background: white; font-family: Arial, Helvetica, sans-serif; }
-    .page { width: 210mm; min-height: 297mm; background: white; display: flex; flex-direction: column; }
-    .content { flex: 1; display: flex; flex-direction: column; }
-  </style>
-</head>
-<body>
-<div class="page">
-
-  <!-- Header -->
-  <div style="display:flex;height:120px;flex-shrink:0;">
-    <div style="width:42%;display:flex;align-items:center;padding:0 30px;">
-      <img src="${origin}/logo-invoice.png" style="height:54px;width:auto;display:block;" alt="DnyanSetu">
-    </div>
-    <div style="flex:1;background:#1A7A8E;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:flex;align-items:center;justify-content:flex-end;padding-right:30px;">
-      <span style="color:white;font-size:78px;font-weight:900;font-family:Arial Black,Arial,sans-serif;letter-spacing:2px;line-height:1;">INVOICE</span>
-    </div>
-  </div>
-
-  <!-- Content (flex:1 pushes footer to bottom) -->
-  <div class="content">
-
-    <!-- Meta info -->
-    <div style="padding:30px 30px 18px 30px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;margin-bottom:22px;">
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Invoice No: <strong style="color:#111827;">${invoiceNo}</strong></span>
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Date: <strong style="color:#111827;">${fmtDate(new Date().toISOString())}</strong></span>
-        <span></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;margin-bottom:22px;">
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Name: <strong style="color:#111827;">${studentName}</strong></span>
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Phone No: <strong style="color:#111827;">${formData.phone || 'N/A'}</strong></span>
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Email: <strong style="color:#111827;">${formData.email || 'N/A'}</strong></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;margin-bottom:22px;">
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Admission Date: <strong style="color:#111827;">${fmtDate(payment.paidAt || payment.createdAt)}</strong></span>
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Course Fees: <strong style="color:#111827;">${totalFee.toLocaleString('en-IN')}</strong></span>
-        <span></span>
-      </div>
-      <div>
-        <span style="font-size:14px;color:#374151;line-height:1.6;">Course Name: <strong style="color:#111827;">${courseName}</strong></span>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <div style="padding:8px 30px 16px 30px;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#d4e8f2;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-            <th style="padding:13px 16px;text-align:left;font-size:13px;font-weight:400;color:#374151;border:1px solid #c5d8e2;">Sr. No</th>
-            <th style="padding:13px 16px;text-align:left;font-size:13px;font-weight:400;color:#374151;border:1px solid #c5d8e2;">Date</th>
-            <th style="padding:13px 16px;text-align:left;font-size:13px;font-weight:400;color:#374151;border:1px solid #c5d8e2;">Fees Paid</th>
-            <th style="padding:13px 16px;text-align:left;font-size:13px;font-weight:400;color:#374151;border:1px solid #c5d8e2;">Fees Remaining</th>
-            <th style="padding:13px 16px;text-align:left;font-size:13px;font-weight:400;color:#374151;border:1px solid #c5d8e2;">Next Installment Date</th>
-          </tr>
-        </thead>
-        <tbody>${tableRows || emptyRow}</tbody>
-      </table>
-    </div>
-
-    <!-- Note + Signature -->
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 30px 40px 30px;gap:12px;">
-      <div style="display:flex;justify-content:flex-end;">
-        <span style="font-size:13px;font-weight:400;color:#1F2937;letter-spacing:0.2px;">DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA</span>
-      </div>
-      <div style="padding:10px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:4px;font-size:12px;color:#92400E;font-style:italic;">
-        <strong>Note:</strong> Fees once paid is not refundable at any reason.
-      </div>
-    </div>
-
-  </div><!-- end .content -->
-
-  <!-- Footer (always at page bottom) -->
-  <div style="flex-shrink:0;background:#1A7A8E;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:22px 30px;display:flex;justify-content:space-between;align-items:flex-start;">
-    <div>
-      <p style="font-weight:700;font-size:13px;color:white;margin-bottom:7px;">Institute Address:</p>
-      <p style="font-size:11.5px;color:rgba(255,255,255,0.85);max-width:380px;line-height:1.65;">${[branchInfo?.name, branchInfo?.address, branchInfo?.location].filter(Boolean).join(', ') || 'DnyanSetu Institute, Hadapsar, Pune'}</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;padding-top:2px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 9.5a19.79 19.79 0 01-3.13-8.63A2 2 0 013.54 3h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 10.5a16 16 0 006 6l.92-.92a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0121.5 18z"/></svg>
-        <span style="font-size:13px;color:white;">${branchInfo?.phone1 || '+91 987 654 3210'}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-        <span style="font-size:13px;color:white;">${branchInfo?.adminEmail || 'dnyansetu@gmail.com'}</span>
-      </div>
-    </div>
-  </div>
-
-</div>
-<script>window.onload = function() { window.print(); };</script>
-</body>
-</html>`);
-    receiptWindow.document.close();
+    const courseFee = Number(enrollment?.courseFee || 0);
+    const ok = openPrintInvoice({
+      invoiceNo: getInvoiceNumber(payment.id),
+      invoiceDate: new Date().toISOString(),
+      studentName: `${formData.firstName} ${formData.middleName ? formData.middleName + ' ' : ''}${formData.lastName}`.trim(),
+      phone: formData.phone || 'N/A',
+      email: formData.email || 'N/A',
+      prn: '',
+      admissionDate: payment.paidAt || payment.createdAt,
+      courseFee,
+      courseName: courses.find((c) => c.id === formData.courseId)?.name || 'N/A',
+      installments: buildInstallments(enrollment?.payments || [], courseFee),
+      branchAddress: [branchInfo?.name, branchInfo?.address, branchInfo?.location].filter(Boolean).join(', ') || 'DnyanSetu Institute, Hadapsar, Pune',
+      branchPhone: branchInfo?.phone1 || '+91 987 654 3210',
+      branchEmail: branchInfo?.adminEmail || 'dnyansetu@gmail.com',
+      logoUrl: `${window.location.origin}/logo-invoice.png`,
+    });
+    if (!ok) toast.error('Unable to open print window. Please allow popups for this site.');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -442,6 +318,7 @@ const AddStudent: React.FC = () => {
           await paymentService.create({
             enrollmentId: enrollment.id,
             feeTaken: Number(newPaymentAmount),
+            ...(newPaymentNextDate ? { nextInstallmentDate: newPaymentNextDate } : {}),
           });
         }
 
@@ -871,27 +748,45 @@ const AddStudent: React.FC = () => {
                   <p className="text-[13px] text-[#008A27] font-medium">All fees have been paid in full. No further payment is required.</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <label className="text-[14px] font-semibold text-[#1A2332]">
-                    Record New Payment <span className="text-[12px] font-normal text-[#64748B]">(remaining: ₹{remaining.toLocaleString('en-IN')})</span>
-                  </label>
-                  <div className="relative max-w-xs">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#64748B] font-medium">₹</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max={remaining}
-                      value={newPaymentAmount}
-                      onChange={(e) => {
-                        setNewPaymentAmount(e.target.value);
-                        setPaymentAmountError('');
-                      }}
-                      placeholder="Enter amount"
-                      className={`w-full h-11 pl-8 pr-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA] ${paymentAmountError ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`}
-                    />
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[14px] font-semibold text-[#1A2332]">
+                      Record New Payment <span className="text-[12px] font-normal text-[#64748B]">(remaining: ₹{remaining.toLocaleString('en-IN')})</span>
+                    </label>
+                    <div className="relative max-w-xs">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#64748B] font-medium">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max={remaining}
+                        value={newPaymentAmount}
+                        onChange={(e) => {
+                          setNewPaymentAmount(e.target.value);
+                          setPaymentAmountError('');
+                          if (Number(e.target.value) >= remaining) setNewPaymentNextDate('');
+                        }}
+                        placeholder="Enter amount"
+                        className={`w-full h-11 pl-8 pr-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA] ${paymentAmountError ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`}
+                      />
+                    </div>
+                    {paymentAmountError && <p className="text-[12px] text-[#C8102E]">{paymentAmountError}</p>}
+                    <p className="text-[11px] text-[#94A3B8]">Leave blank if no payment is being recorded now.</p>
                   </div>
-                  {paymentAmountError && <p className="text-[12px] text-[#C8102E]">{paymentAmountError}</p>}
-                  <p className="text-[11px] text-[#94A3B8]">Leave blank if no payment is being recorded now.</p>
+
+                  {/* Next installment date — shown only when the new payment won't clear the balance */}
+                  {Number(newPaymentAmount) > 0 && Number(newPaymentAmount) < remaining && (
+                    <div className="flex flex-col gap-2 max-w-xs">
+                      <label className="text-[14px] font-semibold text-[#1A2332]">
+                        Next Installment Date <span className="text-[#C8102E]">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={newPaymentNextDate}
+                        onChange={(e) => setNewPaymentNextDate(e.target.value)}
+                        className="w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA]"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

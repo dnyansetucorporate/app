@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Edit2, Trash2, Printer, Phone, Mail } from 'lucide-react';
+import { getInvoiceNumber, formatInvoiceDate, formatInvoiceCurrency, buildInstallments, type InvoiceInstallment } from '@/utils/invoiceUtils';
 import toast from 'react-hot-toast';
 import { paymentService } from '@/services/payment.service';
 import { CardSkeleton } from '@/components/SkeletonLoader';
@@ -45,31 +46,7 @@ interface Payment {
   };
 }
 
-interface InstallmentRow {
-  date: string;
-  feesPaid: number;
-  feesRemaining: number;
-  nextInstallmentDate: string | null;
-}
 
-const formatDate = (dateStr: string | null | undefined): string => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${dd}-${mm}`;
-};
-
-const formatCurrency = (amount: number): string =>
-  amount.toLocaleString('en-IN');
-
-const getInvoiceNumber = (id: string): string => {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0;
-  return String((Math.abs(h) % 9000) + 1000);
-};
 
 const DnyanSetuLogo: React.FC = () => (
   <img src="/logo-invoice.png" style={{ height: '54px', width: 'auto', display: 'block' }} alt="DnyanSetu" />
@@ -85,7 +62,7 @@ export const PaymentDetail: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [payment, setPayment] = useState<Payment | null>(null);
-  const [installments, setInstallments] = useState<InstallmentRow[]>([]);
+  const [installments, setInstallments] = useState<InvoiceInstallment[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -103,22 +80,7 @@ export const PaymentDetail: React.FC = () => {
           enrollmentId: p.enrollmentId,
           limit: 100,
         });
-        const sorted = ((allResp.data as any[]) || []).sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-
-        const courseFee = Number(p.courseFee);
-        let cumulative = 0;
-        const rows: InstallmentRow[] = sorted.map((ap: any) => {
-          cumulative += Number(ap.feeTaken);
-          return {
-            date: ap.createdAt,
-            feesPaid: Number(ap.feeTaken),
-            feesRemaining: courseFee - cumulative,
-            nextInstallmentDate: ap.nextInstallmentDate ?? null,
-          };
-        });
-        setInstallments(rows);
+        setInstallments(buildInstallments(allResp.data as any[] || [], Number(p.courseFee)));
       } catch (err: any) {
         toast.error(err.response?.data?.message || 'Failed to load payment');
         navigate(-1);
@@ -267,7 +229,7 @@ export const PaymentDetail: React.FC = () => {
             {/* Row 1: Invoice No | Date (3-col grid, date in col 2) */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', marginBottom: '22px' }}>
               <MetaLabel label="Invoice No" value={getInvoiceNumber(payment.id)} />
-              <MetaLabel label="Date" value={formatDate(payment.createdAt)} />
+              <MetaLabel label="Date" value={formatInvoiceDate(payment.createdAt)} />
               <span />
             </div>
 
@@ -281,8 +243,8 @@ export const PaymentDetail: React.FC = () => {
             {/* Row 3: PRN No | Admission Date | Course Fees */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', marginBottom: '22px' }}>
               <MetaLabel label="PRN No" value={student?.prn || 'N/A'} />
-              <MetaLabel label="Admission Date" value={formatDate(payment.enrollment?.enrolledAt)} />
-              <MetaLabel label="Course Fees" value={formatCurrency(courseFee)} />
+              <MetaLabel label="Admission Date" value={formatInvoiceDate(payment.enrollment?.enrolledAt)} />
+              <MetaLabel label="Course Fees" value={formatInvoiceCurrency(courseFee)} />
             </div>
 
             {/* Row 4: Course Name */}
@@ -336,16 +298,16 @@ export const PaymentDetail: React.FC = () => {
                         {idx + 1}
                       </td>
                       <td style={{ padding: '24px 16px', fontSize: '13px', color: '#1F2937', border: `1px solid ${TABLE_ROW_BORDER}` }}>
-                        {formatDate(row.date)}
+                        {formatInvoiceDate(row.date)}
                       </td>
                       <td style={{ padding: '24px 16px', fontSize: '13px', color: '#1F2937', border: `1px solid ${TABLE_ROW_BORDER}` }}>
-                        {formatCurrency(row.feesPaid)}
+                        {formatInvoiceCurrency(row.feesPaid)}
                       </td>
                       <td style={{ padding: '24px 16px', fontSize: '13px', color: '#1F2937', border: `1px solid ${TABLE_ROW_BORDER}` }}>
-                        {formatCurrency(row.feesRemaining)}
+                        {formatInvoiceCurrency(row.feesRemaining)}
                       </td>
                       <td style={{ padding: '24px 16px', fontSize: '13px', color: '#1F2937', border: `1px solid ${TABLE_ROW_BORDER}` }}>
-                        {row.nextInstallmentDate ? formatDate(row.nextInstallmentDate) : ''}
+                        {row.nextInstallmentDate ? formatInvoiceDate(row.nextInstallmentDate) : ''}
                       </td>
                     </tr>
                   ))
