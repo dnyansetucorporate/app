@@ -358,7 +358,7 @@ export const PaymentDetail: React.FC = () => {
             </div>
 
             {/* Contact */}
-            {/* <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Phone size={14} color="rgba(255,255,255,0.8)" />
                 <span style={{ fontSize: '13px', color: 'white' }}>{institutePhone}</span>
@@ -367,7 +367,7 @@ export const PaymentDetail: React.FC = () => {
                 <Mail size={14} color="rgba(255,255,255,0.8)" />
                 <span style={{ fontSize: '13px', color: 'white' }}>{instituteEmail}</span>
               </div>
-            </div> */}
+            </div>
           </div>
 
         </div>

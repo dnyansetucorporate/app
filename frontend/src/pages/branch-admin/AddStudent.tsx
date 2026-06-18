@@ -37,6 +37,7 @@ const AddStudent: React.FC = () => {
   const [newPaymentNextDate, setNewPaymentNextDate] = useState('');
   const [paymentAmountError, setPaymentAmountError] = useState('');
   const [branchInfo, setBranchInfo] = useState<{ name: string; address: string; location: string; phone1: string; adminEmail: string } | null>(null);
+  const [studentPrn, setStudentPrn] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -105,6 +106,7 @@ const AddStudent: React.FC = () => {
     try {
       const res: any = await studentService.getById(editId);
       const s = res?.data || res;
+      setStudentPrn(s.prn || '');
       setFormData({
         firstName: s.firstName || '',
         middleName: s.middleName || '',
@@ -248,12 +250,12 @@ const AddStudent: React.FC = () => {
       studentName: `${formData.firstName} ${formData.middleName ? formData.middleName + ' ' : ''}${formData.lastName}`.trim(),
       phone: formData.phone || 'N/A',
       email: formData.email || 'N/A',
-      prn: '',
+      prn: studentPrn || 'N/A',
       admissionDate: payment.paidAt || payment.createdAt,
       courseFee,
       courseName: courses.find((c) => c.id === formData.courseId)?.name || 'N/A',
       installments: buildInstallments(enrollment?.payments || [], courseFee),
-      branchAddress: [branchInfo?.name, branchInfo?.address, branchInfo?.location].filter(Boolean).join(', ') || 'DnyanSetu Institute, Hadapsar, Pune',
+      branchAddress: branchInfo?.address || 'Hadapsar, Pune',
       branchPhone: branchInfo?.phone1 || '+91 987 654 3210',
       branchEmail: branchInfo?.adminEmail || 'dnyansetu@gmail.com',
       logoUrl: `${window.location.origin}/logo-invoice.png`,

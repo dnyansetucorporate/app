@@ -169,6 +169,8 @@ export function generateInvoiceHtml(data: InvoiceData): string {
   </div>
 
 </div>
+<style>.print-btn{position:fixed;top:12px;right:12px;padding:8px 18px;background:#1A7A8E;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-family:Arial,sans-serif;z-index:9999;}@media print{.print-btn{display:none;}}</style>
+<button class="print-btn" onclick="window.print()">Print</button>
 <script>window.onload = function() { window.print(); };</script>
 </body>
 </html>`;

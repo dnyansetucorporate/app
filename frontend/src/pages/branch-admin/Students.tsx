@@ -70,7 +70,7 @@ const Students: React.FC = () => {
       courseFee,
       courseName: enrollment?.course?.name || 'N/A',
       installments: buildInstallments(enrollment?.payments || [], courseFee),
-      branchAddress: [student.branch?.name, student.branch?.address, student.branch?.location].filter(Boolean).join(', ') || 'DnyanSetu Institute, Hadapsar, Pune',
+      branchAddress: student.branch?.address || 'Hadapsar, Pune',
       branchPhone: student.branch?.phone1 || '+91 987 654 3210',
       branchEmail: student.branch?.admin?.email || 'dnyansetu@gmail.com',
       logoUrl: `${window.location.origin}/logo-invoice.png`,
