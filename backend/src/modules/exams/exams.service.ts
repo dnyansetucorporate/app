@@ -232,7 +232,8 @@ export const getExamStudents = async (examId: string) => {
       student: {
         select: {
           id: true, prn: true, firstName: true, lastName: true, phone: true,
-          enrollments: { select: { course: { select: { id: true, name: true } } } },
+          createdAt: true,
+          enrollments: { select: { enrolledAt: true, course: { select: { id: true, name: true } } } },
         },
       },
     },
@@ -247,7 +248,8 @@ export const getExamStudents = async (examId: string) => {
     where: { branchId: exam.branchId, isActive: true },
     select: {
       id: true, prn: true, firstName: true, lastName: true, phone: true,
-      enrollments: { select: { course: { select: { id: true, name: true } } } },
+      createdAt: true,
+      enrollments: { select: { enrolledAt: true, course: { select: { id: true, name: true } } } },
     },
   });
 };

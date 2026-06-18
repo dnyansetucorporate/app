@@ -367,7 +367,11 @@ const Exams: React.FC = () => {
                           <td className="py-4 px-6 text-[14px] text-[#1A2332]">{s.prn}</td>
                           <td className="py-4 px-6 text-[14px] text-[#1A2332]">{s.firstName} {s.lastName}</td>
                           <td className="py-4 px-6 text-[14px] text-[#1A2332]">
-                            {s.admissionDate ? new Date(s.admissionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                            {s.enrollments?.[0]?.enrolledAt
+                              ? new Date(s.enrollments[0].enrolledAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : s.createdAt
+                              ? new Date(s.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : '—'}
                           </td>
                         </tr>
                       ))}
@@ -414,6 +418,7 @@ const Exams: React.FC = () => {
               <tr>
                 <th className="py-4 px-6 font-medium whitespace-nowrap w-20">Sr. No</th>
                 <th className="py-4 px-6 font-medium whitespace-nowrap">Branch Name</th>
+                <th className="py-4 px-6 font-medium whitespace-nowrap">Course</th>
                 <th className="py-4 px-6 font-medium whitespace-nowrap">Exam Date</th>
                 <th className="py-4 px-6 font-medium whitespace-nowrap">Location</th>
                 <th className="py-4 px-6 font-medium whitespace-nowrap">No. of Students</th>
@@ -423,20 +428,21 @@ const Exams: React.FC = () => {
             <tbody className="divide-y divide-[#E2E8F0]">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-20 text-center">
+                  <td colSpan={7} className="py-20 text-center">
                     <Loader2 className="animate-spin text-[#4DB8CA] mx-auto mb-2" size={32} />
                     <span className="text-gray-400 text-sm">Fetching exam requests...</span>
                   </td>
                 </tr>
               ) : exams.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-gray-500">No {activeTab} exams found.</td>
+                  <td colSpan={7} className="py-10 text-center text-gray-500">No {activeTab} exams found.</td>
                 </tr>
               ) : (
                 exams.map((row: any, idx: number) => (
                   <tr key={row.id} className={cn('hover:bg-[#F8FAFC] transition-colors', idx % 2 === 1 && 'bg-[#F8FAFC]')}>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branch?.name}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.examCourses?.map((ec: any) => ec.course?.name).filter(Boolean).join(', ') || '—'}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{new Date(row.examDate).toLocaleDateString()}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branch?.location}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.numStudents || 0}</td>

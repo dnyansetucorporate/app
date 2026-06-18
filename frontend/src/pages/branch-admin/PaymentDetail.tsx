@@ -118,8 +118,8 @@ export const PaymentDetail: React.FC = () => {
     ? `${student.firstName}${student.middleName ? ' ' + student.middleName : ''} ${student.lastName}`
     : 'N/A';
   const instituteAddress = branch
-    ? `${branch.name}, ${branch.address}, ${branch.location}`
-    : 'DnyanSetu Institute, Hadapsar, Pune';
+    ? `${branch.address}`
+    : 'Hadapsar, Pune';
   const institutePhone = branch?.phone1 || '+91 987 654 3210';
   const instituteEmail = branch?.admin?.email || 'dnyansetu@gmail.com';
 
@@ -352,13 +352,13 @@ export const PaymentDetail: React.FC = () => {
               <p style={{ fontWeight: 700, fontSize: '13px', color: 'white', marginBottom: '7px' }}>
                 Institute Address:
               </p>
-              <p style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.85)', maxWidth: '380px', lineHeight: 1.65 }}>
+              <p style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.65 }}>
                 {instituteAddress}
               </p>
             </div>
 
             {/* Contact */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+            {/* <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Phone size={14} color="rgba(255,255,255,0.8)" />
                 <span style={{ fontSize: '13px', color: 'white' }}>{institutePhone}</span>
@@ -367,7 +367,7 @@ export const PaymentDetail: React.FC = () => {
                 <Mail size={14} color="rgba(255,255,255,0.8)" />
                 <span style={{ fontSize: '13px', color: 'white' }}>{instituteEmail}</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
         </div>
