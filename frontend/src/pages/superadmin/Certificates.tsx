@@ -260,7 +260,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 .stamp-wax{position:absolute;left:268px;top:655px;height:75px;width:auto;z-index:5;}
 .stamp-iso,.stamp-msme,.stamp-wax{display:block;object-fit:contain;}
 .sigtext{position:absolute;left:540px;top:665px;width:340px;text-align:center;z-index:3;}
-.sig-svg{position:absolute;left:540px;top:610px;width:340px;height:52px;z-index:3;}
+.sig-svg{position:absolute;left:615px;top:598px;width:190px;height:68px;z-index:3;object-fit:contain;}
 .sig-lbl{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:400;color:#0F172A;line-height:1.5;}
 .sig-org{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#14596E;line-height:1.5;}
 .photo{position:absolute;left:720px;top:55px;width:290px;height:290px;border-radius:50%;overflow:hidden;border:7px solid #C8A020;background:#d1e8ec;display:flex;align-items:center;justify-content:center;z-index:4;}
@@ -294,10 +294,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   <img class="stamp-wax" src="${o}/certificate-assets/student/wax-seal.png" alt="" crossorigin="anonymous" />
 
 
-  <svg class="sig-svg" viewBox="0 0 340 52" xmlns="http://www.w3.org/2000/svg">
-    <path d="M100 38 Q112 18 124 30 Q136 42 148 26 Q158 12 170 28 Q182 44 194 30 Q206 16 218 28 Q228 38 240 28" fill="none" stroke="#1A2332" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="90" y1="46" x2="250" y2="46" stroke="#1A2332" stroke-width="1"/>
-  </svg>
+  <img class="sig-svg" src="${o}/Superadmin%20Signature.svg" alt="Signature" crossorigin="anonymous" />
   <div class="sigtext">
     <div class="sig-lbl">Chairman &amp; Managing Director</div>
     <div class="sig-org">DNYANSETU INSTITUTION INDIA</div>
@@ -468,20 +465,18 @@ tbody tr:last-child td{border-bottom:none;}
 </html>`;
   };
 
-  const handleStudentInvoiceDownload = async (certId: string) => {
+  const handleStudentInvoiceDownload = async (certRow: any) => {
     const toastId = hotToast.loading('Generating invoice image…');
     try {
-      const certRes: any = await certificateService.getById(certId);
-      const cert = certRes?.data || certRes;
-      const studentId = cert.student?.id || cert.studentId;
+      const studentId = certRow.student?.id || certRow.studentId;
       let payments: any[] = [];
       if (studentId) {
         const payRes: any = await paymentService.getStudentPayments(studentId);
         payments = payRes?.data || payRes || [];
         if (!Array.isArray(payments)) payments = [];
       }
-      const name = `${cert.student?.firstName || ''} ${cert.student?.lastName || ''}`.trim() || certId;
-      await downloadAsPng(studentInvoiceHtml(cert, payments), `invoice-${name.replace(/\s+/g, '-')}.png`);
+      const name = `${certRow.student?.firstName || ''} ${certRow.student?.lastName || ''}`.trim() || certRow.id;
+      await downloadAsPng(studentInvoiceHtml(certRow, payments), `invoice-${name.replace(/\s+/g, '-')}.png`);
       hotToast.success('Invoice downloaded', { id: toastId });
     } catch {
       hotToast.error('Failed to download invoice', { id: toastId });
@@ -590,9 +585,9 @@ tbody tr:last-child td{border-bottom:none;}
                         <td className="py-4 px-6 text-[14px] font-semibold">
                           {cert.examStatus === 'NOT_APPEARED'
                             ? <span className="text-[#F59E0B]">Exam Not Given</span>
-                            : cert.examStatus === 'PENDING'
-                            ? <span className="text-[#64748B]">Pending</span>
-                            : <span className="text-[#0BB783]">{marksToGrade(cert.marks)}</span>
+                            : cert.grade != null
+                            ? <span className="text-[#0BB783]">{cert.grade}</span>
+                            : <span className="text-[#64748B]">Pending</span>
                           }
                         </td>
                       </>
@@ -609,7 +604,7 @@ tbody tr:last-child td{border-bottom:none;}
                           </button>
                         )}
                         <button
-                          onClick={() => handleStudentInvoiceDownload(cert.id)}
+                          onClick={() => handleStudentInvoiceDownload(cert)}
                           className="text-[#0A3D4D] border border-[#0A3D4D] rounded-[4px] p-1.5 hover:bg-[#EEF3F5] transition-colors"
                           title="Download Invoice"
                         >

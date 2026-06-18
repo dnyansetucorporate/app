@@ -91,22 +91,6 @@ export const getExamById = async (id: string) => {
 };
 
 export const createExam = async (data: CreateExamDto) => {
-  // Check for duplicate exam date in the same branch
-  const examDate = new Date(data.examDate);
-  examDate.setHours(0, 0, 0, 0);
-  const nextDay = new Date(examDate);
-  nextDay.setDate(nextDay.getDate() + 1);
-
-  const existing = await prisma.exam.findFirst({
-    where: { branchId: data.branchId, examDate: { gte: examDate, lt: nextDay } },
-  });
-  if (existing) {
-    throw Object.assign(
-      new Error('An exam is already scheduled for this branch on that date'),
-      { status: 409 }
-    );
-  }
-
   // Validate all studentIds belong to the specified branch
   if (data.studentIds?.length) {
     const students = await prisma.student.findMany({
@@ -358,7 +342,7 @@ export const listResults = async (examId: string) => {
     prisma.examResult.findMany({
       where: { examId },
       include: {
-        student: { select: { id: true, prn: true, firstName: true, lastName: true, phone: true } },
+        student: { select: { id: true, prn: true, firstName: true, lastName: true, phone: true, createdAt: true, enrollments: { select: { enrolledAt: true }, take: 1, orderBy: { enrolledAt: 'asc' } } } },
       },
     }),
   ]);

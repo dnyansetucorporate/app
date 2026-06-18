@@ -311,7 +311,7 @@ const Exams: React.FC = () => {
                 Credentials are ready. You can now view and share them with the student.
               </p>
               <div className="w-full flex flex-col gap-3">
-                <button
+                {/* <button
                   onClick={() => {
                     const passwordText = generatedPasswords
                       .map((p: any) => `${p.studentName}: ${p.password}`)
@@ -323,7 +323,7 @@ const Exams: React.FC = () => {
                 >
                   <Eye size={20} />
                   View Credentials
-                </button>
+                </button> */}
                 <button
                   onClick={() => setShowSuccessModal(false)}
                   className="text-[15px] text-[#64748B] font-medium hover:text-[#1A2332] transition-colors"

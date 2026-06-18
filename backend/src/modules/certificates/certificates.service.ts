@@ -23,19 +23,29 @@ export const listCertificates = async (query: Record<string, unknown>, branchIdF
         select: {
           id: true, name: true, location: true, atpNo: true, branchCode: true, createdAt: true,
           certificates: { select: { status: true } },
-          exams: { select: { examDate: true, status: true } },
+          exams: {
+            where: { status: 'APPROVED' },
+            select: { examDate: true, status: true, examStudents: { select: { studentId: true } } },
+          },
         },
       }),
     ]);
 
     const data = branches.map((b: any) => {
       // Latest approved exam date for this branch
-      const approvedExams = (b.exams || []).filter((e: any) => e.status === 'APPROVED');
-      const latestExam = approvedExams.sort((a: any, z: any) =>
+      const approvedExams = (b.exams || []);
+      const latestExam = [...approvedExams].sort((a: any, z: any) =>
         new Date(z.examDate).getTime() - new Date(a.examDate).getTime()
       )[0] ?? null;
 
-      const totalStudents = b.certificates.length;
+      // Count unique students across all approved exams
+      const uniqueStudentIds = new Set<string>();
+      for (const exam of approvedExams) {
+        for (const es of (exam.examStudents || [])) {
+          uniqueStudentIds.add(es.studentId);
+        }
+      }
+      const totalStudents = uniqueStudentIds.size;
       const passedStudents = b.certificates.filter((c: any) => c.status === 'ISSUED').length;
 
       return {
@@ -205,25 +215,26 @@ export const getBranchCertStudents = async (branchId: string, query: Record<stri
   const { page, limit, skip, take } = getPaginationParams(query);
   const search = query.search as string | undefined;
 
-  // Find the latest APPROVED exam for this branch
-  const latestExam = await prisma.exam.findFirst({
+  // Get ALL approved exams for this branch (not just the latest one)
+  const approvedExams = await prisma.exam.findMany({
     where: { branchId, status: 'APPROVED' },
-    orderBy: { examDate: 'desc' },
     select: {
       id: true,
-      examDate: true,
-      examCourses: {
-        select: { course: { select: { id: true, name: true } } },
-        take: 1,
-      },
+      examCourses: { select: { course: { select: { id: true, name: true } } }, take: 1 },
     },
   });
 
-  if (!latestExam) {
+  if (!approvedExams.length) {
     return { certs: [], meta: buildPaginationMeta(0, page, limit) };
   }
 
-  const examCourse = latestExam.examCourses?.[0]?.course ?? null;
+  const examIds = approvedExams.map((e: any) => e.id);
+
+  // Build a map from examId -> course for later lookup
+  const examCourseMap = new Map<string, any>();
+  for (const e of approvedExams) {
+    examCourseMap.set(e.id, e.examCourses?.[0]?.course ?? null);
+  }
 
   // Build student search filter
   const studentWhere: any = {};
@@ -235,29 +246,41 @@ export const getBranchCertStudents = async (branchId: string, query: Record<stri
     ];
   }
 
-  const [total, examStudents] = await Promise.all([
-    prisma.examStudent.count({
-      where: { examId: latestExam.id, student: studentWhere },
+  // Get all unique students across all approved exams for this branch
+  const [total, students] = await Promise.all([
+    prisma.student.count({
+      where: { ...studentWhere, examStudents: { some: { examId: { in: examIds } } } },
     }),
-    prisma.examStudent.findMany({
-      where: { examId: latestExam.id, student: studentWhere },
+    prisma.student.findMany({
+      where: { ...studentWhere, examStudents: { some: { examId: { in: examIds } } } },
       skip, take,
-      include: {
-        student: { select: { id: true, prn: true, firstName: true, lastName: true } },
-      },
+      select: { id: true, prn: true, firstName: true, lastName: true },
+      orderBy: { createdAt: 'asc' },
     }),
   ]);
 
-  if (examStudents.length === 0) {
+  if (!students.length) {
     return { certs: [], meta: buildPaginationMeta(total, page, limit) };
   }
 
-  const studentIds = examStudents.map((es: any) => es.studentId);
+  const studentIds = students.map((s: any) => s.id);
+
+  // For each student, get their exam assignment to know which exam/course they belong to
+  const examStudentLinks = await prisma.examStudent.findMany({
+    where: { examId: { in: examIds }, studentId: { in: studentIds } },
+    select: { examId: true, studentId: true },
+  });
+  // Use first assignment per student to determine their course
+  const studentExamMap = new Map<string, string>(); // studentId -> examId
+  for (const es of examStudentLinks) {
+    if (!studentExamMap.has(es.studentId)) studentExamMap.set(es.studentId, es.examId);
+  }
 
   // Fetch exam results and issued certificates in parallel
   const [results, certificates] = await Promise.all([
     prisma.examResult.findMany({
-      where: { examId: latestExam.id, studentId: { in: studentIds } },
+      where: { examId: { in: examIds }, studentId: { in: studentIds } },
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.certificate.findMany({
       where: { branchId, studentId: { in: studentIds }, status: 'ISSUED' },
@@ -266,25 +289,31 @@ export const getBranchCertStudents = async (branchId: string, query: Record<stri
     }),
   ]);
 
-  const resultMap  = new Map(results.map((r: any)      => [r.studentId, r]));
-  const certMap    = new Map(certificates.map((c: any) => [c.studentId, c]));
+  // Keep only the latest result per student
+  const resultMap = new Map<string, any>();
+  for (const r of results) {
+    if (!resultMap.has(r.studentId)) resultMap.set(r.studentId, r);
+  }
+  const certMap = new Map<string, any>();
+  for (const c of certificates) {
+    if (!certMap.has(c.studentId)) certMap.set(c.studentId, c);
+  }
 
-  const certs = examStudents.map((es: any) => {
-    const result = resultMap.get(es.studentId);
-    const cert   = certMap.get(es.studentId);
-    const course = cert?.course ?? examCourse;
+  const certs = students.map((student: any) => {
+    const result = resultMap.get(student.id);
+    const cert   = certMap.get(student.id);
+    const examId = studentExamMap.get(student.id);
+    const course = cert?.course ?? (examId ? examCourseMap.get(examId) : null);
 
     return {
-      id:        cert?.id ?? es.id,
+      id:        cert?.id ?? student.id,
       certNo:    cert?.certNo ?? null,
-      studentId: es.studentId,
-      student:   es.student,
+      studentId: student.id,
+      student,
       course,
-      marks:     result?.marks   ?? null,
-      issuedAt:  cert?.issuedAt  ?? null,
-      // NOT_APPEARED = scheduled but never took the exam
-      // PENDING      = took the exam but certificate not yet issued
-      // ISSUED       = has a valid certificate
+      marks:     result?.marks ?? null,
+      grade:     result?.grade ?? null,
+      issuedAt:  cert?.issuedAt ?? null,
       examStatus: result
         ? (cert ? 'ISSUED' : 'PENDING')
         : 'NOT_APPEARED',

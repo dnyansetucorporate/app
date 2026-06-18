@@ -321,7 +321,7 @@ const ExamResults: React.FC = () => {
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{(detailPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{r.student?.prn || '–'}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{r.student?.firstName} {r.student?.lastName}</td>
-                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{r.student?.admissionDate ? formatDate(r.student.admissionDate) : r.student?.createdAt ? formatDate(r.student.createdAt) : '–'}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{r.student?.enrollments?.[0]?.enrolledAt ? formatDate(r.student.enrollments[0].enrolledAt) : r.student?.createdAt ? formatDate(r.student.createdAt) : '–'}</td>
                     <td className="py-4 px-6 text-[14px] font-semibold text-[#0BB783]">{r.marks} %</td>
                     <td className="py-4 px-6 text-[14px] font-bold">
                       <span className={

@@ -24,7 +24,7 @@ export const getAvailableExams = async (studentId: string) => {
     .filter((e: any) => e.paymentStatus === 'FULL_PAID')
     .map((e: any) => e.courseId);
 
-  // Find exams scheduled for TODAY only (passwords are unique to exam date, valid 24hr)
+  // Find exams scheduled for TODAY only that this student is specifically assigned to
   const exams = await prisma.exam.findMany({
     where: {
       branchId: student.branchId,
@@ -32,6 +32,9 @@ export const getAvailableExams = async (studentId: string) => {
       status: 'APPROVED',
       examCourses: {
         some: { courseId: { in: enrolledCourseIds } },
+      },
+      examStudents: {
+        some: { studentId },
       },
     },
     include: {
@@ -184,8 +187,8 @@ export const submitExamResult = async (studentId: string, examId: string, answer
     data: { examId, studentId, marks, grade },
   });
 
-  // 4. Auto-issue certificate for grade A or B — verify enrollment is still FULL_PAID
-  if (grade === 'A' || grade === 'B') {
+  // 4. Auto-issue certificate for all grades — verify enrollment is still FULL_PAID
+  if (grade) {
     const examCourseIds = exam.examCourses.map((ec: any) => ec.courseId);
     const paidEnrollment = await prisma.enrollment.findFirst({
       where: {
