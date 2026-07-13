@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { sendSuccess } from '../../utils/response.js';
+import { sendSuccess, getPaginationParams, buildPaginationMeta } from '../../utils/response.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { getStats, getPerformanceData, getEnrollmentData, getRecentStudents } from './dashboard.service.js';
 import type { AuthRequest } from '../../middleware/auth.middleware.js';
@@ -32,6 +32,7 @@ export const enrollment = asyncHandler(async (req: AuthRequest, res: Response): 
 export const recentStudents = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
   const { branchId, from, to } = req.query as { branchId?: string; from?: string; to?: string };
   const scopedBranchId = req.user?.role === 'BRANCH_ADMIN' ? req.user.branchId : branchId;
-  const data = await getRecentStudents(scopedBranchId, from, to);
-  sendSuccess(res, data, 'Recent students fetched');
+  const { page, limit, skip, take } = getPaginationParams(req.query, 8);
+  const { students, total } = await getRecentStudents(scopedBranchId, from, to, skip, take);
+  sendSuccess(res, students, 'Recent students fetched', 200, buildPaginationMeta(total, page, limit));
 });

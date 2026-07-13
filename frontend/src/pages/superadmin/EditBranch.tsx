@@ -28,6 +28,7 @@ const EditBranchSchema = Yup.object().shape({
   phone2: Yup.string().optional().test('phone2', 'Valid Indian mobile number required', (v) => !v || indianPhoneRegex.test(v)),
   address: Yup.string().required('Address is required').min(5, 'At least 5 characters'),
   location: Yup.string().required('Location is required').min(2, 'At least 2 characters'),
+  validUpto: Yup.string().required('Valid upto date is required'),
   aadharNo: Yup.string().optional().test('aadhar', 'Aadhar must be 12 digits', (v) => !v || aadharRegex.test(v)),
   panNo: Yup.string().optional().test('pan', 'PAN must be in format: AAAAA0000A', (v) => !v || panRegex.test(v)),
 });
@@ -176,6 +177,7 @@ const EditBranch: React.FC = () => {
         fd.append('address', values.address);
         fd.append('location', values.location);
         if (values.adminDob) fd.append('adminDob', values.adminDob);
+        if (values.validUpto) fd.append('validUpto', values.validUpto);
         if (values.aadharNo) fd.append('aadharNo', values.aadharNo);
         if (values.panNo) fd.append('panNo', values.panNo);
         if (logoFile) fd.append('logo', logoFile);
@@ -191,6 +193,7 @@ const EditBranch: React.FC = () => {
           address: values.address,
           location: values.location,
           ...(values.adminDob ? { adminDob: values.adminDob } : {}),
+          ...(values.validUpto ? { validUpto: values.validUpto } : {}),
           ...(values.aadharNo ? { aadharNo: values.aadharNo } : {}),
           ...(values.panNo ? { panNo: values.panNo } : {}),
         };
@@ -225,6 +228,7 @@ const EditBranch: React.FC = () => {
     location: branchData.location || '',
     aadharNo: branchData.aadharNo || '',
     panNo: branchData.panNo || '',
+    validUpto: branchData.validUpto ? new Date(branchData.validUpto).toISOString().split('T')[0] : '',
   };
 
   return (
@@ -301,6 +305,12 @@ const EditBranch: React.FC = () => {
                     <Field name="location" placeholder="Enter location"
                       className={cn("w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none placeholder:text-[#94A3B8] focus:border-[#4DB8CA]", errors.location && touched.location && 'border-[#C8102E]')} />
                     <ErrorMessage name="location" component="p" className="text-[#C8102E] text-[12px] mt-1" />
+                  </FormField>
+
+                  <FormField label="Valid Upto" required>
+                    <Field name="validUpto" type="date"
+                      className={cn("w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]", (errors as any).validUpto && (touched as any).validUpto && 'border-[#C8102E]')} />
+                    <ErrorMessage name="validUpto" component="p" className="text-[#C8102E] text-[12px] mt-1" />
                   </FormField>
 
                   {/* Aadhar */}

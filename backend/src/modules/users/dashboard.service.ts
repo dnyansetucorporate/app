@@ -133,7 +133,13 @@ export const getEnrollmentData = async (branchId?: string) => {
   }));
 };
 
-export const getRecentStudents = async (branchId?: string, from?: string, to?: string) => {
+export const getRecentStudents = async (
+  branchId?: string,
+  from?: string,
+  to?: string,
+  skip = 0,
+  take = 8
+) => {
   const where: any = { isActive: true };
   if (branchId) where.branchId = branchId;
   if (from || to) {
@@ -142,15 +148,21 @@ export const getRecentStudents = async (branchId?: string, from?: string, to?: s
     if (to)   where.createdAt.lte = new Date(to);
   }
 
-  return prisma.student.findMany({
-    where,
-    take: 8,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      enrollments: {
-        include: { course: { select: { name: true } } },
-        take: 1,
+  const [students, total] = await Promise.all([
+    prisma.student.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        enrollments: {
+          include: { course: { select: { name: true } } },
+          take: 1,
+        },
       },
-    },
-  });
+    }),
+    prisma.student.count({ where }),
+  ]);
+
+  return { students, total };
 };

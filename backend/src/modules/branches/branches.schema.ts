@@ -37,6 +37,7 @@ export const createBranchSchema = z.object({
     .regex(passwordRegex, 'Password must contain uppercase, lowercase, number, and special character (@$!%*?&)'),
   adminDob: z.string().optional(),
   logo: z.string().optional(),
+  validUpto: z.string().optional().or(z.literal('')),
 });
 
 export const updateBranchSchema = createBranchSchema.partial().omit({

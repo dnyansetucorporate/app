@@ -101,6 +101,7 @@ export const createBranch = async (data: CreateBranchDto) => {
           ...(data.aadharImage !== undefined && { aadharImage: data.aadharImage }),
           panNo:      data.panNo,
           ...(data.panImage !== undefined && { panImage: data.panImage }),
+          ...(data.validUpto && { validUpto: new Date(data.validUpto) }),
           adminId:    admin.id,
         },
         include: { admin: { select: { id: true, name: true, email: true } } },
@@ -131,6 +132,7 @@ export const updateBranch = async (id: string, data: UpdateBranchDto) =>
       ...(data.logo         !== undefined && { logo:         data.logo }),
       ...(data.aadharImage  !== undefined && { aadharImage:  data.aadharImage }),
       ...(data.panImage     !== undefined && { panImage:     data.panImage }),
+      ...(data.validUpto    !== undefined && { validUpto:    data.validUpto ? new Date(data.validUpto) : null }),
     },
     include: { admin: { select: { id: true, name: true, email: true } } },
   });

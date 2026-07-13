@@ -68,6 +68,7 @@ interface Branch {
   aadharImage?: string;
   panNo?: string;
   panImage?: string;
+  validUpto?: string;
   createdAt: string;
   admin?: { id: string; name: string; email: string };
   _count?: { students: number };
@@ -413,6 +414,7 @@ const AllBranches: React.FC = () => {
                       { label: 'Enter Location', value: selectedBranch.location },
                       { label: 'Aadhar Card Number', value: selectedBranch.aadharNo },
                       { label: 'PAN Card Number', value: selectedBranch.panNo },
+                      { label: 'Valid Upto', value: selectedBranch.validUpto ? new Date(selectedBranch.validUpto).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : undefined },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex flex-col gap-1.5">
                         <label className="text-[14px] font-semibold text-[#1A2332]">{label}</label>

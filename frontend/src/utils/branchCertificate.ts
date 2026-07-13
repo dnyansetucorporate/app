@@ -83,7 +83,9 @@ export const downloadAsPng = (html: string, filename: string): Promise<void> => 
 
 export const branchCertificateHtml = (branch: any): string => {
   const o = window.location.origin;
-  const validUpto = 'Jan 2028';
+  const validUpto = branch.validUpto
+    ? new Date(branch.validUpto).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    : 'N/A';
   const branchLocation = branch.location || branch.branchName || branch.name || 'Hadapsar';
   const atpNo = branch.atpNo || (branch.branchCode ? `DYAN/ATP/${branch.branchCode}` : 'DYAN/ATP/—');
 

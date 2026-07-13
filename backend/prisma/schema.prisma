@@ -80,6 +80,7 @@ model Branch {
   panImage   String?
   phone1     String
   phone2     String?
+  validUpto  DateTime?
   adminId    String   @unique
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
@@ -166,7 +167,7 @@ model Student {
   firstName  String
   middleName String?
   lastName   String
-  email      String?   @unique
+  email      String?
   phone     String
   address   String?
   dob       DateTime?
