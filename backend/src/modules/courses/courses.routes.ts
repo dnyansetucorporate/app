@@ -12,6 +12,7 @@ import {
   updateCourseSchema,
   courseQuerySchema,
   createQuestionPaperSchema,
+  updateQuestionPaperSchema,
   addQuestionSchema,
 } from './courses.schema.js';
 
@@ -28,7 +29,7 @@ router.delete('/:id', requireRole('SUPER_ADMIN'), remove);
 // ── Question Papers ──────────────────────────────────────────
 router.get('/:id/papers', listPapers);
 router.post('/:id/papers', requireRole('SUPER_ADMIN'), validate(createQuestionPaperSchema), createPaper);
-router.patch('/:courseId/papers/:paperId', requireRole('SUPER_ADMIN'), validate(createQuestionPaperSchema), updatePaper);
+router.patch('/:courseId/papers/:paperId', requireRole('SUPER_ADMIN'), validate(updateQuestionPaperSchema), updatePaper);
 router.delete('/:courseId/papers/:paperId', requireRole('SUPER_ADMIN'), removePaper);
 
 // ── Questions ────────────────────────────────────────────────

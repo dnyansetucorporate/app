@@ -494,7 +494,7 @@ const Courses: React.FC = () => {
                                setEditingPaperId(paper.id);
                                setSelectedCourseForPaper(viewCourseId);
                                setPaperName(paper.title);
-                               setPaperDuration('');
+                               setPaperDuration(String(paper.durationMinutes ?? 90));
                                setQuestions(existingQuestions);
                                setPaperError(null);
                                setViewPapers(false);
@@ -740,6 +740,7 @@ const Courses: React.FC = () => {
                 onClick={async () => {
                   if (!selectedCourseForPaper) { setPaperError('Please select a course'); return; }
                   if (!paperName.trim()) { setPaperError('Please enter a paper name'); return; }
+                  if (!paperDuration) { setPaperError('Please select an exam duration'); return; }
                   if (questions.length === 0) { setPaperError('Please add at least one question'); return; }
                   setPaperError(null);
                   setSavingPaper(true);
@@ -747,7 +748,7 @@ const Courses: React.FC = () => {
                     let paperId: string;
                     if (editingPaperId) {
                       // Update existing paper
-                      await courseService.updatePaper(selectedCourseForPaper, editingPaperId, { title: paperName.trim() });
+                      await courseService.updatePaper(selectedCourseForPaper, editingPaperId, { title: paperName.trim(), durationMinutes: Number(paperDuration) });
                       paperId = editingPaperId;
                       // Delete all existing questions then re-add
                       const existingRes: any = await courseService.listQuestions(paperId);
@@ -755,7 +756,7 @@ const Courses: React.FC = () => {
                         courseService.removeQuestion(paperId, q.id)
                       ));
                     } else {
-                      const paperRes: any = await courseService.createPaper(selectedCourseForPaper, { title: paperName.trim() });
+                      const paperRes: any = await courseService.createPaper(selectedCourseForPaper, { title: paperName.trim(), durationMinutes: Number(paperDuration) });
                       paperId = paperRes.data?.id;
                     }
                     await Promise.all(questions.map(q =>

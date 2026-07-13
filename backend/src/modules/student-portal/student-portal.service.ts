@@ -42,12 +42,13 @@ export const getAvailableExams = async (studentId: string) => {
         where: { courseId: { in: enrolledCourseIds } },
         include: {
           course: { select: { id: true, name: true } },
-          questionPaper: { 
-            select: { 
-              id: true, 
+          questionPaper: {
+            select: {
+              id: true,
               title: true,
+              durationMinutes: true,
               _count: { select: { questions: true } }
-            } 
+            }
           },
         },
       },
@@ -62,8 +63,6 @@ export const getAvailableExams = async (studentId: string) => {
     }
   });
 
-  const EXAM_DURATION_MINUTES = 90;
-
   return {
     student: {
       name: `${student.firstName} ${student.lastName}`,
@@ -77,7 +76,7 @@ export const getAvailableExams = async (studentId: string) => {
         isCompleted,
         examCourses: exam.examCourses.map((examCourse) => ({
           ...examCourse,
-          durationMinutes: EXAM_DURATION_MINUTES,
+          durationMinutes: examCourse.questionPaper?.durationMinutes ?? 90,
           totalQuestions: examCourse.questionPaper?._count?.questions ?? 0,
         })),
       };
@@ -121,6 +120,7 @@ export const getExamQuestions = async (examId: string, courseId: string, student
     examId,
     courseId,
     title: examCourse.questionPaper.title,
+    durationMinutes: examCourse.questionPaper.durationMinutes,
     questions: examCourse.questionPaper.questions,
   };
 };

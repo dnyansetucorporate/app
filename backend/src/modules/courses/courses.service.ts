@@ -1,6 +1,6 @@
 import { prisma } from '../../config/prisma.js';
 import { getPaginationParams, buildPaginationMeta } from '../../utils/response.js';
-import type { CreateCourseDto, CreateQuestionPaperDto, AddQuestionDto } from './courses.schema.js';
+import type { CreateCourseDto, CreateQuestionPaperDto, UpdateQuestionPaperDto, AddQuestionDto } from './courses.schema.js';
 
 export const listCourses = async (query: Record<string, unknown>, scopedBranchId?: string) => {
   const { page, limit, skip, take } = getPaginationParams(query);
@@ -99,14 +99,21 @@ export const getQuestionPapersByCourseId = async (courseId: string) => {
 
 export const createQuestionPaper = async (courseId: string, data: CreateQuestionPaperDto) => {
   return prisma.questionPaper.create({
-    data: { courseId, title: data.title },
+    data: {
+      courseId,
+      title: data.title,
+      ...(data.durationMinutes !== undefined && { durationMinutes: data.durationMinutes }),
+    },
   });
 };
 
-export const updateQuestionPaper = async (paperId: string, data: { title: string }) => {
+export const updateQuestionPaper = async (paperId: string, data: UpdateQuestionPaperDto) => {
   return prisma.questionPaper.update({
     where: { id: paperId },
-    data: { title: data.title },
+    data: {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.durationMinutes !== undefined && { durationMinutes: data.durationMinutes }),
+    },
   });
 };
 

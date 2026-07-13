@@ -24,13 +24,16 @@ const StudentLayout: React.FC = () => {
         <div className="flex items-center gap-2">
            <img src="/logo.svg" alt="Dnyansetu" className="h-14 w-auto object-contain" />
         </div>
-        <button
-          onClick={logout}
-          className="flex items-center gap-2 px-4 py-2 text-[14px] font-medium text-[#1A2332] bg-white border border-[#E2E8F0] rounded-[8px] hover:bg-[#F8FAFC] transition-colors shadow-sm"
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <div id="student-header-right" />
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 px-4 py-2 text-[14px] font-medium text-[#1A2332] bg-white border border-[#E2E8F0] rounded-[8px] hover:bg-[#F8FAFC] transition-colors shadow-sm"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
       </header>
 
       <main className="relative z-10 flex-1 flex items-center justify-center p-6 sm:p-10 -mt-8">

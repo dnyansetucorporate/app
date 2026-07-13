@@ -9,7 +9,10 @@ export const updateCourseSchema = createCourseSchema.partial();
 
 export const createQuestionPaperSchema = z.object({
   title: z.string().min(1, 'Title is required'),
+  durationMinutes: z.coerce.number().int().min(1).optional(),
 });
+
+export const updateQuestionPaperSchema = createQuestionPaperSchema.partial();
 
 export const addQuestionSchema = z.object({
   questionNo: z.number().int().min(1),
@@ -26,4 +29,5 @@ export const courseQuerySchema = z.object({
 
 export type CreateCourseDto = z.infer<typeof createCourseSchema>;
 export type CreateQuestionPaperDto = z.infer<typeof createQuestionPaperSchema>;
+export type UpdateQuestionPaperDto = z.infer<typeof updateQuestionPaperSchema>;
 export type AddQuestionDto = z.infer<typeof addQuestionSchema>;
