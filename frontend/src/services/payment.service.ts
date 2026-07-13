@@ -22,7 +22,7 @@ export const paymentService = {
   },
 
   getStudentPayments: async (studentId: string) => {
-    return api.get(`/students/${studentId}/payments`);
+    return api.get(`/payments/student/${studentId}/summary`);
   },
 
   getStudentPaymentSummary: async (studentId: string) => {

@@ -471,13 +471,18 @@ tbody tr:last-child td{border-bottom:none;}
     try {
       const studentId = certRow.student?.id || certRow.studentId;
       let payments: any[] = [];
+      let matchedEnrollment: any = null;
       if (studentId) {
         const payRes: any = await paymentService.getStudentPayments(studentId);
-        payments = payRes?.data || payRes || [];
-        if (!Array.isArray(payments)) payments = [];
+        const summaries: any[] = payRes?.data?.enrollmentSummaries || payRes?.enrollmentSummaries || [];
+        matchedEnrollment = summaries.find((e: any) => e.courseName === certRow.course?.name) || summaries[0] || null;
+        payments = matchedEnrollment?.payments || [];
       }
+      const certForInvoice = matchedEnrollment
+        ? { ...certRow, enrollment: { courseFee: matchedEnrollment.courseFee } }
+        : certRow;
       const name = `${certRow.student?.firstName || ''} ${certRow.student?.lastName || ''}`.trim() || certRow.id;
-      await downloadAsPng(studentInvoiceHtml(certRow, payments), `invoice-${name.replace(/\s+/g, '-')}.png`);
+      await downloadAsPng(studentInvoiceHtml(certForInvoice, payments), `invoice-${name.replace(/\s+/g, '-')}.png`);
       hotToast.success('Invoice downloaded', { id: toastId });
     } catch {
       hotToast.error('Failed to download invoice', { id: toastId });
