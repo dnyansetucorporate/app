@@ -20,12 +20,16 @@ const buildStudentWhere = (q: StudentQuery, branchId?: string) => {
   else if (q.branchId) where.branchId = q.branchId;
 
   if (q.search) {
-    where.OR = [
-      { firstName: { contains: q.search, mode: 'insensitive' } },
-      { lastName:  { contains: q.search, mode: 'insensitive' } },
-      { prn:       { contains: q.search, mode: 'insensitive' } },
-      { email:     { contains: q.search, mode: 'insensitive' } },
-    ];
+    // Only match what the UI advertises: name, student ID (PRN), course name
+    const terms = q.search.trim().split(/\s+/).filter(Boolean);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { lastName:  { contains: term, mode: 'insensitive' } },
+        { prn:       { contains: term, mode: 'insensitive' } },
+        { enrollments: { some: { course: { name: { contains: term, mode: 'insensitive' } } } } },
+      ],
+    }));
   }
   if (q.paymentStatus) {
     where.enrollments = { some: { paymentStatus: q.paymentStatus } };

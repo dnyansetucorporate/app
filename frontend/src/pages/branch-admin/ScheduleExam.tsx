@@ -15,6 +15,7 @@ const ScheduleExam: React.FC = () => {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'Schedule Exams' | 'Exam Request Status'>('Schedule Exams');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // ─── List data ──────────────────────────────────────────────────────────
   const [courses, setCourses] = useState<any[]>([]);
@@ -60,7 +61,17 @@ const ScheduleExam: React.FC = () => {
   useEffect(() => {
     setCoursePage(1);
     setExamPage(1);
+    setSearchTerm('');
   }, [activeTab]);
+
+  useEffect(() => {
+    setCoursePage(1);
+    setExamPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setSearchTerm('');
+  }, [selectedCourse, selectedExam]);
 
   const fetchBaseData = async () => {
     setLoading(true);
@@ -200,8 +211,19 @@ const ScheduleExam: React.FC = () => {
 
   const isStudentEligible = (enr: any) => enr.paymentStatus === 'FULL_PAID';
 
+  const getVisibleEnrolledStudents = () => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return enrolledStudents;
+    return enrolledStudents.filter((enr: any) => {
+      const name = `${enr.student?.firstName || ''} ${enr.student?.lastName || ''}`.toLowerCase();
+      const prn = (enr.student?.prn || '').toLowerCase();
+      const courseName = (enr.course?.name || selectedCourse?.name || '').toLowerCase();
+      return name.includes(term) || prn.includes(term) || courseName.includes(term);
+    });
+  };
+
   const toggleAll = () => {
-    const eligibleIds = enrolledStudents.filter(isStudentEligible).map(getStudentId);
+    const eligibleIds = getVisibleEnrolledStudents().filter(isStudentEligible).map(getStudentId);
     if (eligibleIds.length > 0 && eligibleIds.every(id => selectedStudentIds.includes(id))) {
       setSelectedStudentIds([]);
     } else {
@@ -290,10 +312,32 @@ const ScheduleExam: React.FC = () => {
     d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
   const inDrilldown = Boolean(selectedCourse || selectedExam);
-  const totalCoursePages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
-  const totalExamPages = Math.max(1, Math.ceil(examRequests.length / PAGE_SIZE));
-  const pagedCourses = courses.slice((coursePage - 1) * PAGE_SIZE, coursePage * PAGE_SIZE);
-  const pagedExamRequests = examRequests.slice((examPage - 1) * PAGE_SIZE, examPage * PAGE_SIZE);
+  const q = searchTerm.trim().toLowerCase();
+
+  const filteredCourses = q
+    ? courses.filter((c) => (c.name || '').toLowerCase().includes(q))
+    : courses;
+
+  const filteredEnrolledStudents = getVisibleEnrolledStudents();
+
+  const filteredExamRequests = q
+    ? examRequests.filter((req: any) =>
+        (req.examCourses || []).some((ec: any) => (ec.course?.name || '').toLowerCase().includes(q))
+      )
+    : examRequests;
+
+  const filteredExamPasswords = q
+    ? examPasswords.filter((p: any) => {
+        const name = (p.studentName || '').toLowerCase();
+        const prn = (p.prn || p.studentId || '').toLowerCase();
+        return name.includes(q) || prn.includes(q);
+      })
+    : examPasswords;
+
+  const totalCoursePages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
+  const totalExamPages = Math.max(1, Math.ceil(filteredExamRequests.length / PAGE_SIZE));
+  const pagedCourses = filteredCourses.slice((coursePage - 1) * PAGE_SIZE, coursePage * PAGE_SIZE);
+  const pagedExamRequests = filteredExamRequests.slice((examPage - 1) * PAGE_SIZE, examPage * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -323,16 +367,18 @@ const ScheduleExam: React.FC = () => {
         <div className="flex items-center justify-between px-8 py-6">
           <div className="flex items-center gap-4">
             <h4 className="text-[20px] font-bold text-[#1A2332]">
-              {activeTab === 'Schedule Exams' && !selectedCourse && `All Courses (${courses.length} Courses)`}
-              {activeTab === 'Schedule Exams' && selectedCourse && `Students list (${enrolledStudents.length} Students)`}
-              {activeTab === 'Exam Request Status' && !selectedExam && `All Courses (${examRequests.length} Courses)`}
-              {activeTab === 'Exam Request Status' && selectedExam && `Students list (${examPasswords.length} Students)`}
+              {activeTab === 'Schedule Exams' && !selectedCourse && `All Courses (${filteredCourses.length} Courses)`}
+              {activeTab === 'Schedule Exams' && selectedCourse && `Students list (${filteredEnrolledStudents.length} Students)`}
+              {activeTab === 'Exam Request Status' && !selectedExam && `All Courses (${filteredExamRequests.length} Courses)`}
+              {activeTab === 'Exam Request Status' && selectedExam && `Students list (${filteredExamPasswords.length} Students)`}
             </h4>
           </div>
           <div className="flex items-center gap-2 w-full max-w-sm px-4 py-2.5 bg-white border border-[#E2E8F0] rounded-[10px] shadow-sm focus-within:border-[#4DB6C1] transition-all">
             <Search size={18} className="text-[#94A3B8]" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={inDrilldown ? 'Search by name, ID, course' : 'Search by course name'}
               className="bg-transparent border-none focus:outline-none text-[14px] w-full text-[#1A2332] placeholder:text-[#94A3B8]"
             />
@@ -368,8 +414,8 @@ const ScheduleExam: React.FC = () => {
               <tbody className="divide-y divide-[#E2E8F0]">
                 {loading ? (
                   <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="animate-spin text-[#4DB6C1] mx-auto" size={32} /></td></tr>
-                ) : courses.length === 0 ? (
-                  <tr><td colSpan={5} className="py-14 text-center text-[#64748B] text-[15px]">No courses found.</td></tr>
+                ) : filteredCourses.length === 0 ? (
+                  <tr><td colSpan={5} className="py-14 text-center text-[#64748B] text-[15px]">{courses.length === 0 ? 'No courses found.' : 'No courses match your search.'}</td></tr>
                 ) : pagedCourses.map((course, idx) => {
                   const studentCount = course.totalStudents ?? course._count?.enrollments ?? 0;
                   const noStudents = studentCount === 0;
@@ -408,7 +454,7 @@ const ScheduleExam: React.FC = () => {
                   <th className="py-4 px-6 w-16">
                     <input
                       type="checkbox"
-                      checked={enrolledStudents.filter(isStudentEligible).length > 0 && enrolledStudents.filter(isStudentEligible).every(e => selectedStudentIds.includes(getStudentId(e)))}
+                      checked={filteredEnrolledStudents.filter(isStudentEligible).length > 0 && filteredEnrolledStudents.filter(isStudentEligible).every(e => selectedStudentIds.includes(getStudentId(e)))}
                       onChange={toggleAll}
                       className="w-5 h-5 cursor-pointer accent-[#C8102E] rounded border-white/20"
                     />
@@ -425,9 +471,9 @@ const ScheduleExam: React.FC = () => {
               <tbody className="divide-y divide-[#E2E8F0]">
                 {studentsLoading ? (
                   <tr><td colSpan={8} className="py-20 text-center"><Loader2 className="animate-spin text-[#4DB6C1] mx-auto" size={32} /></td></tr>
-                ) : enrolledStudents.length === 0 ? (
-                  <tr><td colSpan={8} className="py-14 text-center text-[#64748B] text-[15px]">No students enrolled in this course.</td></tr>
-                ) : enrolledStudents.map((enr: any, idx) => {
+                ) : filteredEnrolledStudents.length === 0 ? (
+                  <tr><td colSpan={8} className="py-14 text-center text-[#64748B] text-[15px]">{enrolledStudents.length === 0 ? 'No students enrolled in this course.' : 'No students match your search.'}</td></tr>
+                ) : filteredEnrolledStudents.map((enr: any, idx) => {
                   const sid = getStudentId(enr);
                   const checked = selectedStudentIds.includes(sid);
                   const eligible = isStudentEligible(enr);
@@ -481,8 +527,8 @@ const ScheduleExam: React.FC = () => {
               <tbody className="divide-y divide-[#E2E8F0]">
                 {loading ? (
                   <tr><td colSpan={6} className="py-20 text-center"><Loader2 className="animate-spin text-[#4DB6C1] mx-auto" size={32} /></td></tr>
-                ) : examRequests.length === 0 ? (
-                  <tr><td colSpan={6} className="py-14 text-center text-[#64748B] text-[15px]">No exam requests found.</td></tr>
+                ) : filteredExamRequests.length === 0 ? (
+                  <tr><td colSpan={6} className="py-14 text-center text-[#64748B] text-[15px]">{examRequests.length === 0 ? 'No exam requests found.' : 'No exam requests match your search.'}</td></tr>
                 ) : pagedExamRequests.map((req, idx) => (
                   <tr key={req.id} className={cn('transition-all duration-200', idx % 2 === 1 ? 'bg-[#FDFDFD]' : 'bg-white', 'hover:bg-[#F8FBFC]')}>
                     <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{(examPage - 1) * PAGE_SIZE + idx + 1}</td>
@@ -523,15 +569,17 @@ const ScheduleExam: React.FC = () => {
               <tbody className="divide-y divide-[#E2E8F0]">
                 {passwordsLoading ? (
                   <tr><td colSpan={6} className="py-20 text-center"><Loader2 className="animate-spin text-[#4DB6C1] mx-auto" size={32} /></td></tr>
-                ) : examPasswords.length === 0 ? (
+                ) : filteredExamPasswords.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-14 text-center text-[#64748B] text-[15px]">
-                      {selectedExam.status === 'APPROVED'
-                        ? 'No student passwords found for this exam.'
-                        : 'Passwords will be available after super admin approves this exam.'}
+                      {examPasswords.length > 0
+                        ? 'No students match your search.'
+                        : selectedExam.status === 'APPROVED'
+                          ? 'No student passwords found for this exam.'
+                          : 'Passwords will be available after super admin approves this exam.'}
                     </td>
                   </tr>
-                ) : examPasswords.map((p: any, idx) => (
+                ) : filteredExamPasswords.map((p: any, idx) => (
                   <tr key={idx} className={cn('transition-all duration-200', idx % 2 === 1 ? 'bg-[#FDFDFD]' : 'bg-white', 'hover:bg-[#F8FBFC]')}>
                     <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{idx + 1}</td>
                     <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{p.prn || p.studentId || '—'}</td>
@@ -570,10 +618,10 @@ const ScheduleExam: React.FC = () => {
         {/* Footer */}
         <div className="flex items-center justify-between px-8 py-6 border-t border-[#E2E8F0] bg-[#FDFDFD]">
           <p className="text-[14px] font-medium text-[#64748B]">
-            {activeTab === 'Schedule Exams' && !selectedCourse && `Showing data ${(courses.length === 0 ? 0 : (coursePage - 1) * PAGE_SIZE + 1)} to ${Math.min(coursePage * PAGE_SIZE, courses.length)} of ${courses.length} Courses`}
-            {activeTab === 'Schedule Exams' && selectedCourse && `Showing data 1 to ${Math.min(8, enrolledStudents.length)} of ${enrolledStudents.length} Students`}
-            {activeTab === 'Exam Request Status' && !selectedExam && `Showing data ${(examRequests.length === 0 ? 0 : (examPage - 1) * PAGE_SIZE + 1)} to ${Math.min(examPage * PAGE_SIZE, examRequests.length)} of ${examRequests.length} Courses`}
-            {activeTab === 'Exam Request Status' && selectedExam && `Showing data 1 to ${Math.min(8, examPasswords.length)} of ${examPasswords.length} Students`}
+            {activeTab === 'Schedule Exams' && !selectedCourse && `Showing data ${(filteredCourses.length === 0 ? 0 : (coursePage - 1) * PAGE_SIZE + 1)} to ${Math.min(coursePage * PAGE_SIZE, filteredCourses.length)} of ${filteredCourses.length} Courses`}
+            {activeTab === 'Schedule Exams' && selectedCourse && `Showing data 1 to ${Math.min(8, filteredEnrolledStudents.length)} of ${filteredEnrolledStudents.length} Students`}
+            {activeTab === 'Exam Request Status' && !selectedExam && `Showing data ${(filteredExamRequests.length === 0 ? 0 : (examPage - 1) * PAGE_SIZE + 1)} to ${Math.min(examPage * PAGE_SIZE, filteredExamRequests.length)} of ${filteredExamRequests.length} Courses`}
+            {activeTab === 'Exam Request Status' && selectedExam && `Showing data 1 to ${Math.min(8, filteredExamPasswords.length)} of ${filteredExamPasswords.length} Students`}
           </p>
           {!selectedCourse && activeTab === 'Schedule Exams' && (
             <div className="flex items-center gap-1.5">
