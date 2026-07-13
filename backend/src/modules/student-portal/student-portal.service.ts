@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js';
 import { generateCertNo } from '../../utils/certNumber.js';
+import { computeGrade } from '../../utils/grade.js';
 
 export const getAvailableExams = async (studentId: string) => {
   const today = new Date();
@@ -169,7 +170,7 @@ export const submitExamResult = async (studentId: string, examId: string, answer
 
   const rawMarks = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
   const marks = Math.min(100, Math.max(0, rawMarks)); // clamp to 0–100
-  const grade = marks >= 75 ? 'A' : marks >= 50 ? 'B' : 'C';
+  const grade = computeGrade(marks);
 
   // 2. Check for existing submission (duplicate submit)
   const existingResult = await prisma.examResult.findUnique({

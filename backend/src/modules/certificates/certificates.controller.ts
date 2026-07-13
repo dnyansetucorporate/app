@@ -1,8 +1,9 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { sendSuccess } from '../../utils/response.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import * as certificateService from './certificates.service.js';
 import type { AuthRequest } from '../../middleware/auth.middleware.js';
+import type { VerifyCertQuery } from './certificates.schema.js';
 
 // GET /api/certificates
 export const list = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
@@ -24,4 +25,10 @@ export const get = asyncHandler(async (req: AuthRequest, res: Response): Promise
     throw Object.assign(new Error('Access denied: certificate belongs to a different branch'), { status: 403 });
   }
   sendSuccess(res, cert);
+});
+
+// GET /api/certificates/verify — public, no auth required
+export const verify = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const result = await certificateService.verifyCertificate(req.query as unknown as VerifyCertQuery);
+  sendSuccess(res, result, result.found ? 'Certificate found' : 'No matching certificate found');
 });

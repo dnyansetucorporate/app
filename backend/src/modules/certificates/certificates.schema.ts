@@ -8,4 +8,12 @@ export const certQuerySchema = z.object({
   search: z.string().optional(),
 });
 
+export const verifyCertQuerySchema = z
+  .object({
+    certNo: z.string().trim().min(1).optional(),
+    prn: z.string().trim().min(1).optional(),
+  })
+  .refine((d) => Boolean(d.certNo || d.prn), { message: 'certNo or prn is required' });
+
 export type CertQuery = z.infer<typeof certQuerySchema>;
+export type VerifyCertQuery = z.infer<typeof verifyCertQuerySchema>;

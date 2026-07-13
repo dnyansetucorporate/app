@@ -1,6 +1,7 @@
 import { prisma } from '../../config/prisma.js';
 import { getPaginationParams, buildPaginationMeta } from '../../utils/response.js';
-import type { CertQuery } from './certificates.schema.js';
+import { computeGrade } from '../../utils/grade.js';
+import type { CertQuery, VerifyCertQuery } from './certificates.schema.js';
 
 export const listCertificates = async (query: Record<string, unknown>, branchIdFilter?: string) => {
   const { page, limit, skip, take } = getPaginationParams(query);
@@ -348,4 +349,48 @@ export const getCertificateById = async (id: string) => {
   });
   if (!cert) throw Object.assign(new Error('Certificate not found'), { status: 404 });
   return cert;
+};
+
+// Public certificate verification — no auth required. Looks up by the printed
+// certNo and/or the student's PRN, and returns only what's safe to show to an
+// anonymous third party (no email/phone/address/internal ids).
+export const verifyCertificate = async (query: VerifyCertQuery) => {
+  let studentId: string | undefined;
+  if (query.prn) {
+    const student = await prisma.student.findUnique({ where: { prn: query.prn }, select: { id: true } });
+    if (!student) return { found: false as const };
+    studentId = student.id;
+  }
+
+  const certs = await prisma.certificate.findMany({
+    where: {
+      ...(query.certNo ? { certNo: query.certNo } : {}),
+      ...(studentId ? { studentId } : {}),
+    },
+    include: {
+      student: { select: { firstName: true, middleName: true, lastName: true, prn: true } },
+      branch:  { select: { name: true, location: true } },
+      course:  { select: { name: true } },
+    },
+    orderBy: { issuedAt: 'desc' },
+  });
+
+  if (!certs.length) return { found: false as const };
+
+  return {
+    found: true as const,
+    certificates: certs.map((c: any) => ({
+      certNo: c.certNo,
+      status: c.status,
+      studentName: [c.student.firstName, c.student.middleName, c.student.lastName].filter(Boolean).join(' '),
+      prn: c.student.prn,
+      courseName: c.course?.name ?? null,
+      branchName: c.branch?.name ?? null,
+      branchLocation: c.branch?.location ?? null,
+      examDate: c.examDate,
+      issuedAt: c.issuedAt,
+      marks: c.marks,
+      grade: c.marks != null ? computeGrade(c.marks) : null,
+    })),
+  };
 };

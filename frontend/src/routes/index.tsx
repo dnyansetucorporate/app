@@ -7,6 +7,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 import LoginPage from '@/pages/auth/Login';
 
+const VerifyCertificate = React.lazy(() => import('@/pages/public/VerifyCertificate'));
+
 // Super Admin (lazy)
 const SuperAdminDashboard = React.lazy(() => import('@/pages/superadmin/Dashboard'));
 const AllBranches = React.lazy(() => import('@/pages/superadmin/Branches'));
@@ -47,6 +49,9 @@ const AppRoutes: React.FC = () => {
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
         </Route>
+
+      {/* Public Routes (no login required) */}
+        <Route path="/verify-certificate" element={<VerifyCertificate />} />
 
       {/* Super Admin Routes */}
         <Route path="/super-admin" element={

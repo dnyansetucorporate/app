@@ -12,6 +12,10 @@ export const certificateService = {
   getById: async (id: string) => {
     return api.get(`/certificates/${id}`);
   },
+
+  verify: async (params: { certNo?: string; prn?: string }) => {
+    return api.get('/certificates/verify', { params });
+  },
 };
 
 export default certificateService;
