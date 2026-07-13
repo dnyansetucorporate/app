@@ -250,8 +250,8 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 .inst{font-family:'Cinzel',serif;font-weight:700;color:#14596E;font-size:38px;line-height:1.2;text-transform:uppercase;letter-spacing:0;word-spacing:0;}
 .affil{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:400;color:#444;line-height:1.5;letter-spacing:0;word-spacing:0;text-align:center;}
 .presented{font-family:'Cinzel',serif;font-weight:700;color:#262321;font-size:26px;line-height:1.2;letter-spacing:0;word-spacing:0;text-transform:uppercase;}
-.mr{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#5b5651;vertical-align:baseline;line-height:1.05;letter-spacing:0;word-spacing:0;margin-right:14px;}
-.name-text{font-family:'Playfair Display',serif;font-size:62px;font-weight:700;color:#14596E;line-height:1.05;vertical-align:baseline;letter-spacing:0;word-spacing:0;}
+.mr{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:#5b5651;vertical-align:baseline;line-height:1.05;letter-spacing:0;word-spacing:0;margin-right:14px;}
+.name-text{font-family:'Cinzel',serif;font-size:42px;font-weight:700;color:#14596E;line-height:1.05;vertical-align:baseline;letter-spacing:0;word-spacing:0;}
 .completion{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:400;color:#333;line-height:1.5;letter-spacing:0;word-spacing:0;}
 .completion b{font-family:'Montserrat',sans-serif;font-weight:700;color:#222;}
 .grade{font-family:'Montserrat',sans-serif;color:#0BB783;font-weight:700;font-size:20px;}
@@ -283,7 +283,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   <div class="ctr inst" style="top:140px;width:720px;text-align:center;">DNYANSETU EDUCATION &amp; IT<br>INSTITUTION INDIA</div>
   <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affiliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="ctr presented" style="top:336px;width:720px;text-align:center;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-  <div class="ctr" style="top:382px;width:720px;text-align:center;white-space:nowrap;">
+  <div class="ctr" style="top:382px;width:720px;white-space:nowrap;display:flex;align-items:baseline;justify-content:center;">
     <span class="mr">${honorific}</span><span class="name-text">${studentName}</span>
   </div>
   <div class="ctr completion" style="top:472px;width:720px;text-align:center;">for successfully completed <b>${courseName}</b></div>
