@@ -22,15 +22,14 @@ const certResultDateFmt = (d?: string | null) => {
   return `${mon}, ${dt.getFullYear()}`;
 };
 
+// Must match the canonical grading formula in
+// backend/src/modules/student-portal/student-portal.service.ts (submitExamResult),
+// which is what's persisted to ExamResult.grade and shown everywhere else.
 const marksToGrade = (marks?: number | null): string => {
   if (marks == null) return '—';
-  if (marks >= 90) return 'A+';
-  if (marks >= 80) return 'A';
-  if (marks >= 70) return 'B+';
-  if (marks >= 60) return 'B';
-  if (marks >= 50) return 'C+';
-  if (marks >= 40) return 'C';
-  return 'F';
+  if (marks >= 75) return 'A';
+  if (marks >= 50) return 'B';
+  return 'C';
 };
 
 // ─── Reusable Pagination ──────────────────────────────────────────────────────
@@ -254,7 +253,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 .name-text{font-family:'Playfair Display',serif;font-size:62px;font-weight:700;color:#14596E;line-height:1.05;vertical-align:baseline;letter-spacing:0;word-spacing:0;}
 .completion{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:400;color:#333;line-height:1.5;letter-spacing:0;word-spacing:0;}
 .completion b{font-family:'Montserrat',sans-serif;font-weight:700;color:#222;}
-.grade{font-family:'Montserrat',sans-serif;color:#C8102E;font-weight:700;font-size:20px;}
+.grade{font-family:'Montserrat',sans-serif;color:#0BB783;font-weight:700;font-size:20px;}
 .date{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:400;color:#555;line-height:1.2;letter-spacing:0;word-spacing:0;}
 .stamp-iso{position:absolute;left:35px;top:658px;height:70px;width:auto;z-index:5;}
 .stamp-msme{position:absolute;left:130px;top:668px;height:52px;width:auto;z-index:5;}
