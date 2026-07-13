@@ -281,7 +281,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   </div>
 
   <div class="ctr inst" style="top:140px;width:720px;text-align:center;">DNYANSETU EDUCATION &amp; IT<br>INSTITUTION INDIA</div>
-  <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
+  <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affiliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="ctr presented" style="top:336px;width:720px;text-align:center;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
   <div class="ctr" style="top:382px;width:720px;text-align:center;white-space:nowrap;">
     <span class="mr">${honorific}</span><span class="name-text">${studentName}</span>

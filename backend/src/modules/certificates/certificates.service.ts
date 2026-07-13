@@ -22,10 +22,14 @@ export const listCertificates = async (query: Record<string, unknown>, branchIdF
         orderBy: { createdAt: 'desc' },
         select: {
           id: true, name: true, location: true, atpNo: true, branchCode: true, createdAt: true,
-          certificates: { select: { status: true } },
           exams: {
             where: { status: 'APPROVED' },
-            select: { examDate: true, status: true, examStudents: { select: { studentId: true } } },
+            select: {
+              examDate: true,
+              status: true,
+              examStudents: { select: { studentId: true } },
+              examResults: { select: { studentId: true } },
+            },
           },
         },
       }),
@@ -38,15 +42,22 @@ export const listCertificates = async (query: Record<string, unknown>, branchIdF
         new Date(z.examDate).getTime() - new Date(a.examDate).getTime()
       )[0] ?? null;
 
-      // Count unique students across all approved exams
+      // Count unique students scheduled across all approved exams
       const uniqueStudentIds = new Set<string>();
+      // Count unique students who actually submitted one of these exams (ExamResult
+      // exists only once a student submits) — this is the true "passed" population,
+      // not just anyone in the branch holding a certificate from an unrelated exam.
+      const passedStudentIds = new Set<string>();
       for (const exam of approvedExams) {
         for (const es of (exam.examStudents || [])) {
           uniqueStudentIds.add(es.studentId);
         }
+        for (const er of (exam.examResults || [])) {
+          passedStudentIds.add(er.studentId);
+        }
       }
       const totalStudents = uniqueStudentIds.size;
-      const passedStudents = b.certificates.filter((c: any) => c.status === 'ISSUED').length;
+      const passedStudents = passedStudentIds.size;
 
       return {
         id: b.id,
