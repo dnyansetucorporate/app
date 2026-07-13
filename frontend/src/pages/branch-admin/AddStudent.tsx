@@ -45,6 +45,7 @@ const AddStudent: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
+    gender: '',
     address: '',
     dob: '',
     courseId: '',
@@ -113,6 +114,7 @@ const AddStudent: React.FC = () => {
         lastName: s.lastName || '',
         email: s.email || '',
         phone: s.phone || '',
+        gender: s.gender || '',
         address: s.address || '',
         dob: s.dob ? new Date(s.dob).toISOString().split('T')[0] : '',
         courseId: s.enrollments?.[0]?.courseId || s.enrollments?.[0]?.course?.id || '',
@@ -188,6 +190,8 @@ const AddStudent: React.FC = () => {
 
     if (!formData.phone.trim()) errs.phone = 'Phone number is required';
     else if (!indianPhone.test(formData.phone.trim())) errs.phone = 'Must be a valid Indian mobile number (10 digits, starting with 6–9)';
+
+    if (!formData.gender) errs.gender = 'Gender is required';
 
     if (!formData.address.trim()) errs.address = 'Address is required';
     else if (formData.address.trim().length < 5) errs.address = 'Address must be at least 5 characters';
@@ -290,6 +294,7 @@ const AddStudent: React.FC = () => {
           fd.append('lastName', formData.lastName);
           fd.append('email', formData.email);
           fd.append('phone', formData.phone);
+          if (formData.gender) fd.append('gender', formData.gender);
           fd.append('address', formData.address);
           if (formData.dob) fd.append('dob', formData.dob);
           fd.append('photo', photoFile);
@@ -304,6 +309,7 @@ const AddStudent: React.FC = () => {
             address: formData.address,
           };
           if (formData.middleName) updatePayload.middleName = formData.middleName;
+          if (formData.gender) updatePayload.gender = formData.gender;
           if (formData.dob) updatePayload.dob = formData.dob;
           await studentService.update(editId, updatePayload);
         }
@@ -337,6 +343,7 @@ const AddStudent: React.FC = () => {
           fd.append('lastName', formData.lastName);
           fd.append('email', formData.email);
           fd.append('phone', formData.phone);
+          if (formData.gender) fd.append('gender', formData.gender);
           fd.append('address', formData.address);
           if (formData.dob) fd.append('dob', formData.dob);
           fd.append('branchId', branchIdToUse!);
@@ -349,6 +356,7 @@ const AddStudent: React.FC = () => {
             lastName: formData.lastName,
             email: formData.email,
             phone: formData.phone,
+            ...(formData.gender ? { gender: formData.gender } : {}),
             address: formData.address,
             ...(formData.dob ? { dob: formData.dob } : {}),
             branchId: branchIdToUse!,
@@ -420,7 +428,7 @@ const AddStudent: React.FC = () => {
             <button
               onClick={() => {
                 setSuccess(false);
-                setFormData({ firstName: '', middleName: '', lastName: '', email: '', phone: '', address: '', dob: '', courseId: '', branchId: '', totalFees: '', paidFees: '', nextInstallmentDate: '' });
+                setFormData({ firstName: '', middleName: '', lastName: '', email: '', phone: '', gender: '', address: '', dob: '', courseId: '', branchId: '', totalFees: '', paidFees: '', nextInstallmentDate: '' });
                 setPhotoFile(null);
                 setPhotoPreview(null);
               }}
@@ -525,6 +533,29 @@ const AddStudent: React.FC = () => {
             <label className="text-[14px] font-semibold text-[#1A2332]">Phone Number <span className="text-[#C8102E]">*</span></label>
             <input name="phone" value={formData.phone} onChange={handleInputChange} onBlur={handleBlur} type="text" placeholder="Enter student phone number" className={`w-full h-11 px-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA] ${touched.phone && errors.phone ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`} />
             {touched.phone && errors.phone && <p className="text-[12px] text-[#C8102E]">{errors.phone}</p>}
+          </div>
+
+          {/* Row 2.5: Gender */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[14px] font-semibold text-[#1A2332]">Gender <span className="text-[#C8102E]">*</span></label>
+            <div className="relative">
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`w-full h-11 px-4 bg-white border rounded-md text-[14px] text-[#1A2332] outline-none appearance-none cursor-pointer focus:border-[#4DB8CA] ${touched.gender && errors.gender ? 'border-[#C8102E]' : 'border-[#E2E8F0]'}`}
+              >
+                <option value="">Select Gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ChevronDown size={16} className="text-[#64748B]" />
+              </div>
+            </div>
+            {touched.gender && errors.gender && <p className="text-[12px] text-[#C8102E]">{errors.gender}</p>}
           </div>
 
           {/* Row 3: Email Address | Address */}

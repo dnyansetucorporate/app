@@ -101,6 +101,7 @@ export const createStudent = async (data: CreateStudentDto) => {
       lastName:   data.lastName,
       email:      data.email,
       phone:      data.phone,
+      gender:     data.gender,
       address:    data.address,
       dob:        data.dob ? new Date(data.dob) : undefined,
       branchId:   data.branchId,

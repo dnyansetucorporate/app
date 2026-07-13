@@ -21,6 +21,7 @@ export const createStudentSchema = z.object({
   phone: z.string()
     .min(1, 'Phone number is required')
     .regex(indianPhoneRegex, 'Phone number must be a valid Indian mobile number (10 digits, starting with 6-9)'),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   address: z.string().optional().refine(val => !val || val.length >= 5, 'Address must be at least 5 characters'),
   dob: z.string().optional(),
   branchId: z.string().min(1, 'Branch is required'),

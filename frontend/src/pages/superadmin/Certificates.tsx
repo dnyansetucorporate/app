@@ -219,6 +219,7 @@ const Certificates: React.FC = () => {
     const lastName    = cert.student?.lastName   || '';
     const middleInitial = middleName ? `${middleName[0].toUpperCase()}.` : '';
     const studentName = [firstName, middleInitial, lastName].filter(Boolean).join(' ') || 'Student Name';
+    const honorific   = cert.student?.gender === 'FEMALE' ? 'MS.' : 'MR.';
     const prn         = cert.student?.prn   || 'N/A';
     const photoSrc    = photoDataUrl || buildImageUrl(cert.student?.photo || cert.student?.photoUrl);
     const certNo      = cert.certNo || cert.id?.slice(-6)?.toUpperCase() || '000000';
@@ -283,7 +284,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="ctr presented" style="top:336px;width:720px;text-align:center;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
   <div class="ctr" style="top:382px;width:720px;text-align:center;white-space:nowrap;">
-    <span class="mr">MR.</span><span class="name-text">${studentName}</span>
+    <span class="mr">${honorific}</span><span class="name-text">${studentName}</span>
   </div>
   <div class="ctr completion" style="top:472px;width:720px;text-align:center;">for successfully completed <b>${courseName}</b></div>
   <div class="ctr completion" style="top:506px;width:720px;text-align:center;">Held at Dnyansetu Institute, ${branchLoc} with <span class="grade">${grade}</span> Grade.</div>

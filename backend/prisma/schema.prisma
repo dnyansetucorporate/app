@@ -39,6 +39,12 @@ enum CertificateStatus {
   REVOKED
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 // ─────────────────────────────────────────────
 // Users (Super Admin + Branch Admin accounts)
 // ─────────────────────────────────────────────
@@ -170,6 +176,7 @@ model Student {
   lastName   String
   email      String?
   phone     String
+  gender    Gender?
   address   String?
   dob       DateTime?
   branchId  String

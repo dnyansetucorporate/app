@@ -32,6 +32,9 @@ export const downloadAsPng = (html: string, filename: string): Promise<void> => 
             await doc.fonts.load('500 19px "Montserrat"');
             await doc.fonts.load('600 15px "Montserrat"');
             await doc.fonts.load('400 15px "Montserrat"');
+            await doc.fonts.load('700 62px "Playfair Display"');
+            await doc.fonts.load('700 28px "Playfair Display"');
+            await doc.fonts.load('400 62px "Playfair Display"');
           } catch (e) {
             console.warn('Font loading error:', e);
           }
