@@ -239,11 +239,14 @@ export const getBranchCertStudents = async (branchId: string, query: Record<stri
   // Build student search filter
   const studentWhere: any = {};
   if (search) {
-    studentWhere.OR = [
-      { firstName: { contains: search, mode: 'insensitive' } },
-      { lastName:  { contains: search, mode: 'insensitive' } },
-      { prn:       { contains: search, mode: 'insensitive' } },
-    ];
+    const terms = search.trim().split(/\s+/).filter(Boolean);
+    studentWhere.AND = terms.map((term) => ({
+      OR: [
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { lastName:  { contains: term, mode: 'insensitive' } },
+        { prn:       { contains: term, mode: 'insensitive' } },
+      ],
+    }));
   }
 
   // Get all unique students across all approved exams for this branch

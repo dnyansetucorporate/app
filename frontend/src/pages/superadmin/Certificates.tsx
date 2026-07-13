@@ -116,6 +116,7 @@ const Certificates: React.FC = () => {
   const [bsMeta, setBsMeta]                   = useState<any>(null);
   const [bsPage, setBsPage]                   = useState(1);
   const [bsLoading, setBsLoading]             = useState(false);
+  const [bsSearch, setBsSearch]               = useState('');
 
   // ── Page header ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -159,10 +160,10 @@ const Certificates: React.FC = () => {
     }
   }, []);
 
-  const fetchBranchStudents = useCallback(async (branchId: string, page: number) => {
+  const fetchBranchStudents = useCallback(async (branchId: string, page: number, search: string) => {
     setBsLoading(true);
     try {
-      const res: any = await certificateService.listBranchStudents(branchId, { page, limit: PAGE_SIZE });
+      const res: any = await certificateService.listBranchStudents(branchId, { page, limit: PAGE_SIZE, search: search || undefined });
       const list = res?.certs || res?.data || [];
       setBranchStudents(list);
       setBsMeta(res?.meta || null);
@@ -183,8 +184,8 @@ const Certificates: React.FC = () => {
   }, [activeTab, stuBranchPage, stuBranchSearch, fetchStuBranches]);
 
   useEffect(() => {
-    if (selectedBranch) fetchBranchStudents(selectedBranch.id, bsPage);
-  }, [selectedBranch, bsPage, fetchBranchStudents]);
+    if (selectedBranch) fetchBranchStudents(selectedBranch.id, bsPage, bsSearch);
+  }, [selectedBranch, bsPage, bsSearch, fetchBranchStudents]);
 
   // ── Turn the gold-on-white ornament PNG into a crisp gold-on-transparent layer ─
   // The source art is gold line work on a solid white background. A plain
@@ -488,6 +489,7 @@ tbody tr:last-child td{border-bottom:none;}
     setDrillDownSource('student');
     setSelectedBranch(row);
     setBsPage(1);
+    setBsSearch('');
     setBranchStudents([]);
   };
 
@@ -495,6 +497,7 @@ tbody tr:last-child td{border-bottom:none;}
     setSelectedBranch(null);
     setBranchStudents([]);
     setBsPage(1);
+    setBsSearch('');
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -522,7 +525,9 @@ tbody tr:last-child td{border-bottom:none;}
               <Search size={16} className="text-[#64748B]" />
               <input
                 type="text"
-                placeholder="Search by name, ID, course"
+                placeholder="Search by name, ID"
+                value={bsSearch}
+                onChange={(e) => { setBsSearch(e.target.value); setBsPage(1); }}
                 className="bg-transparent border-none focus:outline-none text-[14px] w-full text-[#1A2332] placeholder:text-[#64748B]"
               />
             </div>
