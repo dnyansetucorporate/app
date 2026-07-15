@@ -259,12 +259,11 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 .name-text{font-family:'Cinzel',serif;font-size:42px;font-weight:700;color:#14596E;line-height:1.05;vertical-align:baseline;letter-spacing:0;word-spacing:0;}
 .completion{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:400;color:#333;line-height:1.5;letter-spacing:0;word-spacing:0;}
 .completion b{font-family:'Montserrat',sans-serif;font-weight:700;color:#222;}
-.grade{font-family:'Montserrat',sans-serif;color:#0BB783;font-weight:700;font-size:20px;}
+.grade{font-family:'Montserrat',sans-serif;color:#000;font-weight:700;font-size:20px;}
 .date{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:400;color:#555;line-height:1.2;letter-spacing:0;word-spacing:0;}
 .stamp-iso{position:absolute;left:35px;top:658px;height:70px;width:auto;z-index:5;}
-.stamp-msme{position:absolute;left:130px;top:668px;height:52px;width:auto;z-index:5;}
-.stamp-wax{position:absolute;left:268px;top:655px;height:75px;width:auto;z-index:5;}
-.stamp-iso,.stamp-msme,.stamp-wax{display:block;object-fit:contain;}
+.stamp-msme{position:absolute;left:190px;top:668px;height:52px;width:auto;z-index:5;}
+.stamp-iso,.stamp-msme{display:block;object-fit:contain;}
 .sigtext{position:absolute;left:540px;top:665px;width:340px;text-align:center;z-index:3;}
 .sig-svg{position:absolute;left:615px;top:598px;width:190px;height:68px;z-index:3;object-fit:contain;}
 .sig-lbl{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:400;color:#0F172A;line-height:1.5;}
@@ -288,7 +287,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   <div class="ctr inst" style="top:140px;width:720px;text-align:center;">DNYANSETU EDUCATION &amp; IT<br>INSTITUTE INDIA</div>
   <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affiliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="ctr presented" style="top:336px;width:720px;text-align:center;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-  <div class="ctr" style="top:382px;width:720px;white-space:nowrap;display:flex;align-items:baseline;justify-content:center;">
+  <div class="ctr" style="top:382px;width:720px;padding-left:70px;white-space:nowrap;display:flex;align-items:baseline;justify-content:center;">
     <span class="mr">${honorific}</span><span class="name-text">${studentName}</span>
   </div>
   <div class="ctr completion" style="top:472px;width:720px;text-align:center;">for successfully completed <b>${courseName}</b></div>
@@ -297,7 +296,6 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 
   <img class="stamp-iso" src="${o}/certificate-assets/student/iso.svg" alt="ISO" crossorigin="anonymous" />
   <img class="stamp-msme" src="${o}/certificate-assets/student/msme.svg" alt="MSME" crossorigin="anonymous" />
-  <img class="stamp-wax" src="${o}/certificate-assets/student/wax-seal.png" alt="" crossorigin="anonymous" />
 
 
   <img class="sig-svg" src="${o}/Superadmin%20Signature.svg" alt="Signature" crossorigin="anonymous" />
