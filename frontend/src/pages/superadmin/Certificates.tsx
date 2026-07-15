@@ -49,7 +49,11 @@ const Pagination = ({
   const totalPages = meta.totalPages ?? 1;
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const to = Math.min(page * PAGE_SIZE, total);
-  const pages = Array.from({ length: Math.min(totalPages, 4) }, (_, i) => i + 1);
+  const windowSize = 4;
+  let start = Math.max(1, page - 1);
+  let end   = Math.min(totalPages, start + windowSize - 1);
+  start     = Math.max(1, end - windowSize + 1);
+  const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
   return (
     <div className="flex items-center justify-between px-6 py-4 border-t border-[#E2E8F0] bg-white">
       <p className="text-[14px] text-[#64748B]">
@@ -63,6 +67,7 @@ const Pagination = ({
         >
           <ChevronLeft size={14} />
         </button>
+        {start > 1 && <span className="px-1 text-[#94A3B8]">...</span>}
         {pages.map(p => (
           <button
             key={p}
@@ -75,7 +80,7 @@ const Pagination = ({
             {p}
           </button>
         ))}
-        {totalPages > 4 && <span className="px-1 text-[#94A3B8]">...</span>}
+        {end < totalPages && <span className="px-1 text-[#94A3B8]">...</span>}
         <button
           onClick={() => onPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages}

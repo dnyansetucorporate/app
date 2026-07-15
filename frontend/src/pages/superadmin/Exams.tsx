@@ -440,7 +440,7 @@ const Exams: React.FC = () => {
               ) : (
                 exams.map((row: any, idx: number) => (
                   <tr key={row.id} className={cn('hover:bg-[#F8FAFC] transition-colors', idx % 2 === 1 && 'bg-[#F8FAFC]')}>
-                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{idx + 1}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{(currentPage - 1) * 10 + idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branch?.name}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.examCourses?.map((ec: any) => ec.course?.name).filter(Boolean).join(', ') || '—'}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{new Date(row.examDate).toLocaleDateString()}</td>
@@ -467,16 +467,21 @@ const Exams: React.FC = () => {
           const totalPages = examMeta?.totalPages ?? 1;
           const from       = total === 0 ? 0 : (currentPage - 1) * 10 + 1;
           const to         = Math.min(currentPage * 10, total);
-          const pages      = Array.from({ length: Math.min(totalPages, 4) }, (_, i) => i + 1);
+          const windowSize = 4;
+          let start = Math.max(1, currentPage - 1);
+          let end   = Math.min(totalPages, start + windowSize - 1);
+          start     = Math.max(1, end - windowSize + 1);
+          const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
           return (
             <div className="flex items-center justify-between px-6 py-4 border-t border-[#E2E8F0] bg-white">
               <p className="text-[14px] text-[#64748B]">Showing data {from} to {to} of {total} Branches</p>
               <div className="flex items-center gap-1.5">
                 <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors"><ChevronLeft size={14} /></button>
+                {start > 1 && <span className="px-1 text-[#94A3B8]">...</span>}
                 {pages.map(p => (
                   <button key={p} onClick={() => setCurrentPage(p)} className={cn('w-8 h-8 flex items-center justify-center rounded text-[14px] transition-colors', p === currentPage ? 'bg-[#0A3D4D] text-white' : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-gray-50')}>{p}</button>
                 ))}
-                {totalPages > 4 && <span className="px-1 text-[#94A3B8]">...</span>}
+                {end < totalPages && <span className="px-1 text-[#94A3B8]">...</span>}
                 <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors"><ChevronRight size={14} /></button>
               </div>
             </div>
