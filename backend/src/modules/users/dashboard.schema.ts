@@ -17,6 +17,11 @@ export const enrollmentQuerySchema = z.object({
 
 export const recentStudentsQuerySchema = z.object({
   branchId: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export type StatsQuery = z.infer<typeof statsQuerySchema>;

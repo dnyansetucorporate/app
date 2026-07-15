@@ -138,7 +138,8 @@ export const getRecentStudents = async (
   from?: string,
   to?: string,
   skip = 0,
-  take = 8
+  take = 8,
+  search?: string
 ) => {
   const where: any = { isActive: true };
   if (branchId) where.branchId = branchId;
@@ -146,6 +147,17 @@ export const getRecentStudents = async (
     where.createdAt = {};
     if (from) where.createdAt.gte = new Date(from);
     if (to)   where.createdAt.lte = new Date(to);
+  }
+  if (search) {
+    const terms = search.trim().split(/\s+/).filter(Boolean);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { lastName:  { contains: term, mode: 'insensitive' } },
+        { prn:       { contains: term, mode: 'insensitive' } },
+        { enrollments: { some: { course: { name: { contains: term, mode: 'insensitive' } } } } },
+      ],
+    }));
   }
 
   const [students, total] = await Promise.all([

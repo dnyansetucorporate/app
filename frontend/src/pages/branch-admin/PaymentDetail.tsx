@@ -320,7 +320,7 @@ export const PaymentDetail: React.FC = () => {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 30px 40px 30px', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <span style={{ fontSize: '13px', fontWeight: 400, color: '#1F2937', letterSpacing: '0.2px' }}>
-                DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA
+                DNYANSETU EDUCATION &amp; IT INSTITUTE INDIA
               </span>
             </div>
             <div style={{

@@ -30,9 +30,9 @@ export const enrollment = asyncHandler(async (req: AuthRequest, res: Response): 
 
 // GET /api/dashboard/recent-students
 export const recentStudents = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-  const { branchId, from, to } = req.query as { branchId?: string; from?: string; to?: string };
+  const { branchId, from, to, search } = req.query as { branchId?: string; from?: string; to?: string; search?: string };
   const scopedBranchId = req.user?.role === 'BRANCH_ADMIN' ? req.user.branchId : branchId;
   const { page, limit, skip, take } = getPaginationParams(req.query, 8);
-  const { students, total } = await getRecentStudents(scopedBranchId, from, to, skip, take);
+  const { students, total } = await getRecentStudents(scopedBranchId, from, to, skip, take, search);
   sendSuccess(res, students, 'Recent students fetched', 200, buildPaginationMeta(total, page, limit));
 });

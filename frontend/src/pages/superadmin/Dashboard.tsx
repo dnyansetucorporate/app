@@ -54,6 +54,8 @@ const SuperAdminDashboard: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [studentMeta, setStudentMeta] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const PAGE_SIZE = 10;
   const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
   const [showStudentDetail, setShowStudentDetail] = useState(false);
@@ -100,6 +102,20 @@ const SuperAdminDashboard: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFrom, dateTo, sortBy, selectedBranch]);
 
+  // Debounce the search input before it triggers a fetch
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (selectedBranch !== undefined) {
+      setCurrentPage(1);
+      void fetchStudents(1);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   useEffect(() => {
     if (selectedBranch !== undefined) {
       void fetchStudents(currentPage);
@@ -118,7 +134,7 @@ const SuperAdminDashboard: React.FC = () => {
         dashboardService.getStats(params),
         dashboardService.getStats(prevParams),
         dashboardService.getPerformance(params),
-        dashboardService.getRecentStudents({ ...params, page, limit: PAGE_SIZE }),
+        dashboardService.getRecentStudents({ ...params, page, limit: PAGE_SIZE, search: debouncedSearch || undefined }),
         dashboardService.getEnrollment(params),
       ]);
       setStats(statsRes.data);
@@ -136,7 +152,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   const fetchStudents = async (page: number) => {
     try {
-      const params = { from: dateFrom, to: dateTo, branchId: selectedBranch, page, limit: PAGE_SIZE };
+      const params = { from: dateFrom, to: dateTo, branchId: selectedBranch, page, limit: PAGE_SIZE, search: debouncedSearch || undefined };
       const studentRes: any = await dashboardService.getRecentStudents(params);
       setRecentStudents(studentRes.data || []);
       setStudentMeta(studentRes.meta || null);
@@ -341,6 +357,8 @@ const SuperAdminDashboard: React.FC = () => {
             <Search size={15} className="text-[#64748B] flex-shrink-0" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name, ID, course"
               className="bg-transparent border-none focus:outline-none text-[13px] w-full text-[#1A2332] placeholder:text-[#94A3B8]"
             />
@@ -378,7 +396,7 @@ const SuperAdminDashboard: React.FC = () => {
               ) : (
                 recentStudents.map((s, idx) => (
                   <tr key={s.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-4 px-5 text-[14px] text-[#1A2332]">{idx + 1}</td>
+                    <td className="py-4 px-5 text-[14px] text-[#1A2332]">{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td className="py-4 px-5 text-[14px] text-[#1A2332]">{s.prn}</td>
                     <td className="py-4 px-5 text-[14px] text-[#1A2332]">{`${s.firstName} ${s.lastName}`}</td>
                     <td className="py-4 px-5 text-[14px] text-[#1A2332]">{s.phone}</td>
@@ -415,7 +433,11 @@ const SuperAdminDashboard: React.FC = () => {
             const totalPages = studentMeta?.totalPages ?? 1;
             const from       = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
             const to         = Math.min(currentPage * PAGE_SIZE, total);
-            const pages      = Array.from({ length: Math.min(totalPages, 4) }, (_, i) => i + 1);
+            const windowSize = 4;
+            let start = Math.max(1, currentPage - 1);
+            let end   = Math.min(totalPages, start + windowSize - 1);
+            start     = Math.max(1, end - windowSize + 1);
+            const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
             return (
               <>
                 <p className="text-[13px] text-[#64748B]">
@@ -423,10 +445,11 @@ const SuperAdminDashboard: React.FC = () => {
                 </p>
                 <div className="flex items-center gap-1.5">
                   <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm">&lt;</button>
+                  {start > 1 && <span className="px-1 text-[#94A3B8]">...</span>}
                   {pages.map(p => (
                     <button key={p} onClick={() => setCurrentPage(p)} className={cn('w-8 h-8 flex items-center justify-center rounded text-[13px] transition-colors', p === currentPage ? 'bg-[#0A3D4D] text-white' : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-gray-50')}>{p}</button>
                   ))}
-                  {totalPages > 4 && <span className="px-1 text-[#94A3B8]">...</span>}
+                  {end < totalPages && <span className="px-1 text-[#94A3B8]">...</span>}
                   <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages} className="w-8 h-8 flex items-center justify-center rounded border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors text-sm">&gt;</button>
                 </div>
               </>

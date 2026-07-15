@@ -280,7 +280,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
     <div class="meta-line"><span class="meta-lbl">PRN No:</span> ${prn}</div>
   </div>
 
-  <div class="ctr inst" style="top:140px;width:720px;text-align:center;">DNYANSETU EDUCATION &amp; IT<br>INSTITUTION INDIA</div>
+  <div class="ctr inst" style="top:140px;width:720px;text-align:center;">DNYANSETU EDUCATION &amp; IT<br>INSTITUTE INDIA</div>
   <div class="ctr affil" style="top:248px;width:700px;text-align:center;">(Affiliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="ctr presented" style="top:336px;width:720px;text-align:center;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
   <div class="ctr" style="top:382px;width:720px;white-space:nowrap;display:flex;align-items:baseline;justify-content:center;">
@@ -298,7 +298,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
   <img class="sig-svg" src="${o}/Superadmin%20Signature.svg" alt="Signature" crossorigin="anonymous" />
   <div class="sigtext">
     <div class="sig-lbl">Chairman &amp; Managing Director</div>
-    <div class="sig-org">DNYANSETU INSTITUTION INDIA</div>
+    <div class="sig-org">DNYANSETU INSTITUTE INDIA</div>
   </div>
 
   <div class="photo">
@@ -448,7 +448,7 @@ tbody tr:last-child td{border-bottom:none;}
     </table>
   </div>
 
-  <div class="company-row">DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA</div>
+  <div class="company-row">DNYANSETU EDUCATION &amp; IT INSTITUTE INDIA</div>
 
   <div class="footer">
     <div class="footer-addr">

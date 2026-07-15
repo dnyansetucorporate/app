@@ -141,7 +141,7 @@ export function generateInvoiceHtml(data: InvoiceData): string {
     <!-- Signature + Note -->
     <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 30px 40px 30px;gap:12px;">
       <div style="display:flex;justify-content:flex-end;">
-        <span style="font-size:13px;font-weight:400;color:#1F2937;letter-spacing:0.2px;">DNYANSETU EDUCATION &amp; IT INSTITUTION INDIA</span>
+        <span style="font-size:13px;font-weight:400;color:#1F2937;letter-spacing:0.2px;">DNYANSETU EDUCATION &amp; IT INSTITUTE INDIA</span>
       </div>
       <div style="padding:10px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:4px;font-size:12px;color:#92400E;font-style:italic;">
         <strong>Note:</strong> Fees once paid is not refundable at any reason.

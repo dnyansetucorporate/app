@@ -124,7 +124,7 @@ body { background: #222; }
 <div class="page">
   <img class="bg" src="${o}/certificate-assets/branch/bg.png" alt="">
   <img class="ornaments" src="${o}/certificate-assets/branch/ornaments.svg" alt="">
-  <div class="main-title">DNYANSETU EDUCATION &amp; IT<br>INSTITUTION INDIA</div>
+  <div class="main-title">DNYANSETU EDUCATION &amp; IT<br>INSTITUTE INDIA</div>
   <div class="affil">(Affiliated by Ministry of Corporate Affairs Government of India<br>CIN.U85490PN2026PTC252150)</div>
   <div class="cert-title">
     <img src="${o}/certificate-assets/branch/authority-certificate.svg" alt="Authority Certificate" style="width:690px;height:auto;display:block;margin:0 auto;" />
@@ -146,7 +146,7 @@ body { background: #222; }
   <div class="bottom-right">
     <div style="width:118px;height:84px;display:block;margin:0 auto 6px;"></div>
     <div class="sign-title">Chairman &amp; Managing Director</div>
-    <div class="sign-org">DNYANSETU INSTITUTION INDIA</div>
+    <div class="sign-org">DNYANSETU INSTITUTE INDIA</div>
   </div>
 </div>
 </body>
