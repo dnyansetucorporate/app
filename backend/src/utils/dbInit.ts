@@ -53,14 +53,14 @@ export async function autoInitializeDatabase() {
     }
 
     // 1. Check if Super Admin exists
-    const superAdminEmail = 'superadmin@test.com';
+    const superAdminEmail = 'dnyansetucorporate@gmail.com';
     const existingAdmin = await prisma.user.findUnique({
       where: { email: superAdminEmail },
     });
 
     if (!existingAdmin) {
       console.log('➕ Creating Super Admin...');
-      const hashedPassword = await bcrypt.hash('Test@123', 12);
+      const hashedPassword = await bcrypt.hash('Super@123', 12);
       await prisma.user.create({
         data: {
           email: superAdminEmail,
