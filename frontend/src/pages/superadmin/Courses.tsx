@@ -3,6 +3,7 @@ import { Search, Eye, Trash2, Plus, X, ChevronLeft, ChevronRight, ChevronDown, A
 import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { courseService } from '@/services/course.service';
+import toast from '@/utils/toastWrapper';
 
 interface Course {
   id: string;
@@ -164,6 +165,8 @@ const Courses: React.FC = () => {
   const [viewPapers, setViewPapers] = useState(false);
   const [viewCourseId, setViewCourseId] = useState('');
   const [viewCourseName, setViewCourseName] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Add Question Paper form state
   const [selectedCourseForPaper, setSelectedCourseForPaper] = useState('');
@@ -296,6 +299,22 @@ const Courses: React.FC = () => {
     }
   };
 
+  const handleDeleteCourse = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await courseService.remove(deleteTarget.id);
+      toast.success('Course deleted successfully');
+      setDeleteTarget(null);
+      fetchCourses();
+    } catch (err: any) {
+      console.error('Failed to delete course', err);
+      toast.error(err?.response?.data?.message || 'Failed to delete course');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const fetchPapers = async (courseId: string) => {
     setLoadingPapers(true);
     try {
@@ -405,7 +424,11 @@ const Courses: React.FC = () => {
                         >
                           <Eye size={16} />
                         </button>
-                        <button className="text-[#C8102E] border border-[#C8102E] rounded-[4px] p-1.5 bg-[#FEF2F2] hover:bg-red-100 transition-colors">
+                        <button
+                          onClick={() => setDeleteTarget(course)}
+                          title="Delete"
+                          className="text-[#C8102E] border border-[#C8102E] rounded-[4px] p-1.5 bg-[#FEF2F2] hover:bg-red-100 transition-colors"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -802,6 +825,36 @@ const Courses: React.FC = () => {
           onAdd={(q) => setQuestions([...questions, q])}
           nextQuestionNo={questions.length + 1}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[18px] font-bold text-[#1A2332]">Delete Course</h3>
+              <p className="text-[14px] text-[#64748B]">
+                Are you sure you want to delete course <span className="font-semibold text-[#1A2332]">{deleteTarget.name}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="px-5 py-2.5 text-[14px] font-medium text-[#64748B] border border-[#E2E8F0] rounded-[6px] hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteCourse}
+                disabled={deleting}
+                className="px-5 py-2.5 text-[14px] font-medium text-white bg-[#C8102E] rounded-[6px] hover:bg-red-800 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Success modal */}
