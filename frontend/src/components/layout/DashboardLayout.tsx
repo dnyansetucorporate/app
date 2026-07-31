@@ -17,8 +17,11 @@ import {
   LogOut,
   Settings,
 } from 'lucide-react';
+import { DayPicker } from 'react-day-picker';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/utils/helpers';
+import { parseYMD, formatYMD, formatDisplayDate } from '@/utils/date';
+import { dayPickerClassNames, dayPickerPanelClassName } from '@/components/dayPickerTheme';
 import { PageHeaderProvider, usePageHeader } from '@/contexts/PageHeaderContext';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserRole } from '@/contexts/AuthContext';
@@ -149,16 +152,20 @@ const DateRangeDropdown: React.FC = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const fmt = (d: string) => {
-    if (!d) return '';
-    const [y, m, day] = d.split('-');
-    return `${day}/${m}/${y}`;
-  };
-
   const handleApply = () => {
     setFilters(ctxSortBy, from, to);
     setOpen(false);
   };
+
+  const handleReset = () => {
+    setFrom('');
+    setTo('');
+  };
+
+  // Whichever end isn't set yet is what the next click will fill in — surfacing
+  // that (rather than a bare calendar) is what tells the user where they are in
+  // the two-click start/end flow.
+  const pickingFrom = !from;
 
   return (
     <div className="relative" ref={ref}>
@@ -168,37 +175,47 @@ const DateRangeDropdown: React.FC = () => {
       >
         <span>Date range <ChevronDown size={12} className="inline ml-1" /></span>
         <br />
-        <span className="text-text-dark font-semibold text-sm">{fmt(ctxFrom)} - {fmt(ctxTo)}</span>
+        <span className="text-text-dark font-semibold text-sm">{formatDisplayDate(ctxFrom)} - {formatDisplayDate(ctxTo)}</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 bg-white border border-border rounded-xl shadow-lg z-50 p-4 min-w-64">
-          <p className="text-xs font-semibold text-text-dark mb-3">Select Date Range</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-text-muted block mb-1">From</label>
-              <input
-                type="date"
-                value={from}
-                onChange={e => setFrom(e.target.value)}
-                className="input-field text-xs py-1.5"
-              />
+        <div className={cn('absolute right-0 top-full mt-2 z-50', dayPickerPanelClassName)}>
+          <div className="flex items-center gap-2 mb-3">
+            <div className={cn('flex-1 rounded-lg border px-3 py-1.5', pickingFrom ? 'border-[#4DB8CA] bg-[#4DB8CA]/5' : 'border-[#E2E8F0]')}>
+              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide">Start</p>
+              <p className="text-xs font-semibold text-text-dark">{from ? formatDisplayDate(from) : 'Select a date'}</p>
             </div>
-            <div>
-              <label className="text-xs text-text-muted block mb-1">To</label>
-              <input
-                type="date"
-                value={to}
-                onChange={e => setTo(e.target.value)}
-                className="input-field text-xs py-1.5"
-              />
+            <div className={cn('flex-1 rounded-lg border px-3 py-1.5', !pickingFrom && !to ? 'border-[#4DB8CA] bg-[#4DB8CA]/5' : 'border-[#E2E8F0]')}>
+              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide">End</p>
+              <p className="text-xs font-semibold text-text-dark">{to ? formatDisplayDate(to) : 'Select a date'}</p>
             </div>
           </div>
-          <button
-            onClick={handleApply}
-            className="btn-primary w-full mt-3 py-1.5 text-xs"
-          >
-            Apply
-          </button>
+          <DayPicker
+            mode="range"
+            navLayout="around"
+            selected={{ from: parseYMD(from), to: parseYMD(to) }}
+            onSelect={(range) => {
+              setFrom(range?.from ? formatYMD(range.from) : '');
+              setTo(range?.to ? formatYMD(range.to) : '');
+            }}
+            classNames={dayPickerClassNames}
+            showOutsideDays
+          />
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={handleReset}
+              disabled={!from && !to}
+              className="px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-dark disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleApply}
+              disabled={!from || !to}
+              className="btn-primary flex-1 py-1.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Apply
+            </button>
+          </div>
         </div>
       )}
     </div>

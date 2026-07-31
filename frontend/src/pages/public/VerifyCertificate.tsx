@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Search, Loader2, CheckCircle2, XCircle, BadgeAlert } from 'lucide-react';
 import { certificateService } from '@/services/certificate.service';
+import { formatCalendarDate } from '@/utils/date';
 
 type CertResult = {
   certNo: string | null;
@@ -18,6 +19,10 @@ type CertResult = {
 
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+
+// examDate is a picked calendar date (no meaningful time-of-day), unlike issuedAt —
+// route it through formatCalendarDate so it can't drift a day by viewer timezone.
+const fmtExamDate = (d?: string | null) => (d ? formatCalendarDate(d) : 'N/A');
 
 const statusBadge = (status: string) => {
   if (status === 'ISSUED') return 'bg-[#E6F9EE] text-[#008A27]';
@@ -125,7 +130,7 @@ const VerifyCertificate: React.FC = () => {
                     { label: 'PRN', value: c.prn },
                     { label: 'Course', value: c.courseName },
                     { label: 'Branch', value: [c.branchName, c.branchLocation].filter(Boolean).join(', ') },
-                    { label: 'Exam Date', value: fmtDate(c.examDate) },
+                    { label: 'Exam Date', value: fmtExamDate(c.examDate) },
                     { label: 'Issued On', value: fmtDate(c.issuedAt) },
                     { label: 'Grade', value: c.grade || 'N/A' },
                   ].map(({ label, value }) => (

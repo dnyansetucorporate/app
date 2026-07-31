@@ -10,6 +10,8 @@ import { paymentService } from '@/services/payment.service';
 import { branchService } from '@/services/branch.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
+import DateInput from '@/components/DateInput';
+import { parseYMD } from '@/utils/date';
 
 const AddStudent: React.FC = () => {
   const { setPageHeader } = usePageHeader();
@@ -617,12 +619,17 @@ const AddStudent: React.FC = () => {
                     <label className={`text-[14px] font-semibold ${hasBalance ? 'text-[#1A2332]' : 'text-[#94A3B8]'}`}>
                       Next Installment Date {hasBalance && <span className="text-[#C8102E]">*</span>}
                     </label>
-                    <input
+                    <DateInput
                       name="nextInstallmentDate"
                       value={formData.nextInstallmentDate}
-                      onChange={handleInputChange}
-                      onBlur={handleBlur}
-                      type="date"
+                      onChange={(value) => {
+                        setFormData(prev => ({ ...prev, nextInstallmentDate: value }));
+                        if (errors.nextInstallmentDate) setErrors(prev => ({ ...prev, nextInstallmentDate: '' }));
+                      }}
+                      onBlur={() => {
+                        setTouched(prev => ({ ...prev, nextInstallmentDate: true }));
+                        setErrors(validateFields());
+                      }}
                       min={new Date().toISOString().split('T')[0]}
                       disabled={!hasBalance}
                       placeholder="Enter next installment date"
@@ -687,7 +694,7 @@ const AddStudent: React.FC = () => {
                         </td>
                         <td className="px-4 py-2.5 text-[#64748B]">
                           {formData.nextInstallmentDate
-                            ? new Date(formData.nextInstallmentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                            ? parseYMD(formData.nextInstallmentDate)!.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                             : '—'}
                         </td>
                       </tr>
@@ -761,7 +768,7 @@ const AddStudent: React.FC = () => {
                             </td>
                             <td className="px-4 py-2.5 text-[#64748B]">
                               {p.nextInstallmentDate
-                                ? new Date(p.nextInstallmentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                ? parseYMD(p.nextInstallmentDate)!.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                                 : <span className="text-[#CBD5E1]">—</span>}
                             </td>
                             <td className="px-4 py-2.5">
@@ -822,10 +829,9 @@ const AddStudent: React.FC = () => {
                         <label className="text-[12px] text-[#64748B]">
                           Next Installment Date <span className="text-[#C8102E]">*</span>
                         </label>
-                        <input
-                          type="date"
+                        <DateInput
                           value={newPaymentNextDate}
-                          onChange={(e) => setNewPaymentNextDate(e.target.value)}
+                          onChange={(value) => setNewPaymentNextDate(value)}
                           className="h-11 px-4 bg-white border border-[#E2E8F0] rounded-md text-[14px] text-[#1A2332] outline-none focus:border-[#4DB8CA]"
                         />
                       </div>

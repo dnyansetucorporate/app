@@ -8,11 +8,17 @@ import { branchService } from '@/services/branch.service';
 import { paymentService } from '@/services/payment.service';
 import { buildImageUrl } from '@/utils/imageUtils';
 import { downloadAsPng, branchCertificateHtml } from '@/utils/branchCertificate';
+import { formatCalendarDate } from '@/utils/date';
 
 const PAGE_SIZE = 10;
 
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+
+// examDate is a picked calendar date (no meaningful time-of-day), unlike
+// createdAt/issuedAt — route it through formatCalendarDate so it can't drift
+// a day by viewer timezone.
+const fmtExamDate = (d?: string | null) => (d ? formatCalendarDate(d) : 'N/A');
 
 /** Certificate date format matching Figma: "Nov, 2025" */
 const certResultDateFmt = (d?: string | null) => {
@@ -760,7 +766,7 @@ tbody tr:last-child td{border-bottom:none;}
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{(stuBranchPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branchName || '—'}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.location || '—'}</td>
-                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{fmtDate(row.examDate)}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{fmtExamDate(row.examDate)}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.passedLabel || `${row.passedStudents ?? 0}/${row.numStudents ?? 0}`}</td>
                     <td className="py-4 px-6 text-center">
                       <button

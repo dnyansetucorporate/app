@@ -1,3 +1,5 @@
+import { parseYMD } from './date';
+
 const TEAL = '#1A7A8E';
 
 export interface InvoiceInstallment {
@@ -28,7 +30,17 @@ export function formatInvoiceDate(d: string | null | undefined): string {
   if (!d) return '';
   const dt = new Date(d);
   if (isNaN(dt.getTime())) return '';
-  return `${dt.getFullYear()}-${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
+// nextInstallmentDate is a picked calendar date (no meaningful time-of-day),
+// unlike the payment `date` above — route it through parseYMD so it can't
+// drift a day by viewer timezone.
+export function formatInvoiceCalendarDate(d: string | null | undefined): string {
+  if (!d) return '';
+  const dt = parseYMD(d);
+  if (!dt) return '';
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
 }
 
 export function formatInvoiceCurrency(n: number): string {
@@ -68,7 +80,7 @@ export function generateInvoiceHtml(data: InvoiceData): string {
         <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${formatInvoiceDate(row.date)}</td>
         <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${formatInvoiceCurrency(row.feesPaid)}</td>
         <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${formatInvoiceCurrency(row.feesRemaining)}</td>
-        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${row.nextInstallmentDate ? formatInvoiceDate(row.nextInstallmentDate) : ''}</td>
+        <td style="padding:24px 16px;font-size:13px;color:#1F2937;border:1px solid #d0e0e8;">${row.nextInstallmentDate ? formatInvoiceCalendarDate(row.nextInstallmentDate) : ''}</td>
       </tr>`).join('');
 
   return `<!DOCTYPE html>

@@ -5,6 +5,7 @@ import toast from '@/utils/toastWrapper';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { examService } from '@/services/exam.service';
 import { courseService } from '@/services/course.service';
+import { formatCalendarDate } from '@/utils/date';
 
 const Exams: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
@@ -244,7 +245,7 @@ const Exams: React.FC = () => {
                 <div className="grid grid-cols-2 gap-x-8">
                   <div className="space-y-2">
                     <label className="block text-[14px] font-semibold text-[#1A2332]">Expected Exam Date</label>
-                    <input type="text" value={viewDetails.examDate ? new Date(viewDetails.examDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} readOnly className="w-full h-12 px-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#64748B] outline-none" />
+                    <input type="text" value={viewDetails.examDate ? formatCalendarDate(viewDetails.examDate, { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} readOnly className="w-full h-12 px-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#64748B] outline-none" />
                   </div>
                   <div className="space-y-2">
                     <label className="block text-[14px] font-semibold text-[#1A2332]">
@@ -443,7 +444,7 @@ const Exams: React.FC = () => {
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{(currentPage - 1) * 10 + idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branch?.name}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.examCourses?.map((ec: any) => ec.course?.name).filter(Boolean).join(', ') || '—'}</td>
-                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{new Date(row.examDate).toLocaleDateString()}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{formatCalendarDate(row.examDate)}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.branch?.location}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{row.numStudents || 0}</td>
                     <td className="py-4 px-6 text-center">

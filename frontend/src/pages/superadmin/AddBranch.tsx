@@ -8,6 +8,7 @@ import { branchService } from '@/services/branch.service';
 import toast from '@/utils/toastWrapper';
 import { validateImageFile, createPreviewUrl } from '@/utils/imageUtils';
 import { downloadAsPng, branchCertificateHtml } from '@/utils/branchCertificate';
+import DateInput from '@/components/DateInput';
 
 const indianPhoneRegex = /^[6-9]\d{9}$/;
 const aadharRegex = /^\d{12}$/;
@@ -332,13 +333,17 @@ const AddBranch: React.FC = () => {
                   </FormField>
 
                   <FormField label="Date of Birth" required>
-                    <Field
-                      name="adminDob"
-                      type="date"
-                      placeholder="Enter admin DOB"
-                      max={new Date().toISOString().split('T')[0]}
-                      className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]"
-                    />
+                    <Field name="adminDob">
+                      {({ field, form }: any) => (
+                        <DateInput
+                          value={field.value}
+                          onChange={(value) => form.setFieldValue('adminDob', value)}
+                          onBlur={() => form.setFieldTouched('adminDob', true)}
+                          max={new Date().toISOString().split('T')[0]}
+                          className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]"
+                        />
+                      )}
+                    </Field>
                     <ErrorMessage name="adminDob" component="p" className="text-[#C8102E] text-[12px] mt-1" />
                   </FormField>
 
@@ -399,12 +404,16 @@ const AddBranch: React.FC = () => {
                   </FormField>
 
                   <FormField label="Valid Upto" required>
-                    <Field
-                      name="validUpto"
-                      type="date"
-                      placeholder="Enter certificate validity date"
-                      className={cn("w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]", (errors as any).validUpto && (touched as any).validUpto && 'border-[#C8102E]')}
-                    />
+                    <Field name="validUpto">
+                      {({ field, form }: any) => (
+                        <DateInput
+                          value={field.value}
+                          onChange={(value) => form.setFieldValue('validUpto', value)}
+                          onBlur={() => form.setFieldTouched('validUpto', true)}
+                          className={cn("w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] font-medium text-[#1A2332] outline-none focus:border-[#4DB8CA]", form.errors.validUpto && form.touched.validUpto && 'border-[#C8102E]')}
+                        />
+                      )}
+                    </Field>
                     <ErrorMessage name="validUpto" component="p" className="text-[#C8102E] text-[12px] mt-1" />
                   </FormField>
 

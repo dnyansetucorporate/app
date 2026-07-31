@@ -5,6 +5,7 @@ import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { branchService } from '@/services/branch.service';
 import toast from '@/utils/toastWrapper';
+import { formatCalendarDate } from '@/utils/date';
 
 // Strip '/api' suffix to get the backend root for serving uploaded files
 const BACKEND_ROOT = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
@@ -414,7 +415,7 @@ const AllBranches: React.FC = () => {
                       { label: 'Enter Location', value: selectedBranch.location },
                       { label: 'Aadhar Card Number', value: selectedBranch.aadharNo },
                       { label: 'PAN Card Number', value: selectedBranch.panNo },
-                      { label: 'Valid Upto', value: selectedBranch.validUpto ? new Date(selectedBranch.validUpto).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : undefined },
+                      { label: 'Valid Upto', value: selectedBranch.validUpto ? formatCalendarDate(selectedBranch.validUpto) : undefined },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex flex-col gap-1.5">
                         <label className="text-[14px] font-semibold text-[#1A2332]">{label}</label>

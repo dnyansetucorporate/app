@@ -1,4 +1,5 @@
 import html2canvas from 'html2canvas';
+import { formatCalendarDate } from './date';
 
 export const downloadAsPng = (html: string, filename: string): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -87,7 +88,7 @@ export const downloadAsPng = (html: string, filename: string): Promise<void> => 
 export const branchCertificateHtml = (branch: any): string => {
   const o = window.location.origin;
   const validUpto = branch.validUpto
-    ? new Date(branch.validUpto).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    ? formatCalendarDate(branch.validUpto, { month: 'short', year: 'numeric' }, 'en-US')
     : 'N/A';
   const branchLocation = branch.location || branch.branchName || branch.name || 'Hadapsar';
   const atpNo = branch.atpNo || (branch.branchCode ? `DYAN/ATP/${branch.branchCode}` : 'DYAN/ATP/—');

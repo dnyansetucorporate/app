@@ -9,6 +9,8 @@ import { courseService } from '@/services/course.service';
 import { examService } from '@/services/exam.service';
 import { enrollmentService } from '@/services/enrollment.service';
 import { studentService } from '@/services/student.service';
+import DateInput from '@/components/DateInput';
+import { formatCalendarDate } from '@/utils/date';
 
 const ScheduleExam: React.FC = () => {
   const { setPageHeader } = usePageHeader();
@@ -310,6 +312,10 @@ const ScheduleExam: React.FC = () => {
   };
   const fmtDate = (d: string) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  // examDate is a picked calendar date (no meaningful time-of-day), unlike
+  // enrolledAt — route it through formatCalendarDate so it can't drift a day
+  // by viewer timezone.
+  const fmtExamDate = (d: string) => (d ? formatCalendarDate(d, { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
   const inDrilldown = Boolean(selectedCourse || selectedExam);
   const q = searchTerm.trim().toLowerCase();
@@ -536,7 +542,7 @@ const ScheduleExam: React.FC = () => {
                       {req.examCourses?.map((ec: any) => ec.course?.name).filter(Boolean).join(', ') || '—'}
                     </td>
                     <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{req.numStudents ?? 0}</td>
-                    <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{fmtDate(req.examDate)}</td>
+                    <td className="py-5 px-8 text-[14px] font-medium text-[#1A2332]">{fmtExamDate(req.examDate)}</td>
                     <td className="py-5 px-8">
                       <span className={cn('px-3 py-1 rounded-[6px] border text-[12px] font-semibold inline-block', statusColor(req.status))}>
                         {statusLabel(req.status)}
@@ -712,11 +718,10 @@ const ScheduleExam: React.FC = () => {
               
               <div className="flex flex-col gap-1.5">
                 <label className="text-[14px] font-semibold text-[#1A2332]">Expected Exam Date</label>
-                <input
-                  type="date"
+                <DateInput
                   min={today}
                   value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
+                  onChange={(value) => setExamDate(value)}
                   className="w-full h-12 px-4 bg-white border border-[#E2E8F0] rounded-md text-[15px] text-[#1A2332] outline-none focus:border-[#4DB6C1]"
                 />
               </div>

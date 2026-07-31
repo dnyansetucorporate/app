@@ -2,6 +2,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Search, ChevronLeft, ChevronRight, ArrowRight, Loader2, ChevronDown } from 'lucide-react';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { examService } from '@/services/exam.service';
+import DateRangePicker from '@/components/DateRangePicker';
+import { formatCalendarDate } from '@/utils/date';
 
 const PAGE_SIZE = 8;
 
@@ -26,6 +28,11 @@ const getYearRange = (sortYear: SortYear) => {
 
 const formatDate = (d: string | Date) =>
   new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+// examDate is a picked calendar date (no meaningful time-of-day), unlike
+// enrolledAt/createdAt — route it through formatCalendarDate so it can't
+// drift a day by viewer timezone.
+const formatExamDate = (d: string) => formatCalendarDate(d, { day: '2-digit', month: 'short', year: 'numeric' }, 'en-GB');
 
 const ExamResults: React.FC = () => {
   const { setPageHeader } = usePageHeader();
@@ -199,18 +206,10 @@ const ExamResults: React.FC = () => {
           {/* Date range */}
           <div className="flex items-center gap-2 text-[14px]">
             <span className="text-[#64748B] font-medium">Date range</span>
-            <input
-              type="date"
-              value={customFrom}
-              onChange={(e) => { setCustomFrom(e.target.value); setSortYear('all'); setListPage(1); }}
-              className="border border-[#E2E8F0] rounded-[6px] px-2 py-1 text-[13px] text-[#1A2332] focus:outline-none focus:border-[#4DB8CA]"
-            />
-            <span className="text-[#64748B]">–</span>
-            <input
-              type="date"
-              value={customTo}
-              onChange={(e) => { setCustomTo(e.target.value); setSortYear('all'); setListPage(1); }}
-              className="border border-[#E2E8F0] rounded-[6px] px-2 py-1 text-[13px] text-[#1A2332] focus:outline-none focus:border-[#4DB8CA]"
+            <DateRangePicker
+              from={customFrom}
+              to={customTo}
+              onChange={(from, to) => { setCustomFrom(from); setCustomTo(to); setSortYear('all'); setListPage(1); }}
             />
             {(customFrom || customTo || sortYear !== 'all') && (
               <button
@@ -275,7 +274,7 @@ const ExamResults: React.FC = () => {
                   <tr key={exam.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{(listPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{exam.examCourses?.[0]?.course?.name || '–'}</td>
-                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{formatDate(exam.examDate)}</td>
+                    <td className="py-4 px-6 text-[14px] text-[#1A2332]">{formatExamDate(exam.examDate)}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">{exam.numStudents ?? 0}</td>
                     <td className="py-4 px-6 text-[14px] text-[#1A2332]">
                       <span className="text-[#0BB783] font-semibold">A:{exam.gradeA ?? 0}</span>
