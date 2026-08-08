@@ -32,6 +32,7 @@ const PaymentDetail = React.lazy(() => import('@/pages/branch-admin/PaymentDetai
 const EnrollmentList = React.lazy(() => import('@/pages/branch-admin/EnrollmentList'));
 const EnrollmentForm = React.lazy(() => import('@/pages/branch-admin/EnrollmentForm'));
 const ScheduleList = React.lazy(() => import('@/pages/branch-admin/ScheduleList'));
+const Enquiries = React.lazy(() => import('@/pages/branch-admin/Enquiries'));
 
 // Student (lazy)
 const SelectExam = React.lazy(() => import('@/pages/student/SelectExam'));
@@ -90,6 +91,7 @@ const AppRoutes: React.FC = () => {
         <Route path="enrollments" element={<EnrollmentList />} />
         <Route path="enrollments/create" element={<EnrollmentForm />} />
         <Route path="schedules" element={<ScheduleList />} />
+        <Route path="enquiries" element={<Enquiries />} />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
 

@@ -12,6 +12,7 @@ import {
   Users,
   UserPlus,
   ClipboardList,
+  Inbox,
   ArrowLeft,
   Menu,
   LogOut,
@@ -50,6 +51,7 @@ const getNavItems = (role: UserRole): NavItem[] => {
       { to: '/branch-admin/dashboard', icon: LayoutDashboard, label: 'Branch Dashboard', matchSegment: 'dashboard' },
       { to: '/branch-admin/students', icon: Users, label: 'All Students', matchSegment: 'students' },
       { to: '/branch-admin/add-student', icon: UserPlus, label: 'Add New Students', matchSegment: 'add-student' },
+      { to: '/branch-admin/enquiries', icon: Inbox, label: 'Enquiry', matchSegment: 'enquiries' },
       { to: '/branch-admin/schedule-exam', icon: Calendar, label: 'Schedule Exams', matchSegment: 'schedule-exam' },
       { to: '/branch-admin/exam-results', icon: ClipboardList, label: 'Exam Results', matchSegment: 'exam-results' },
     ];

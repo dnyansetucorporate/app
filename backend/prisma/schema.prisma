@@ -98,6 +98,7 @@ model Branch {
   enrollments  Enrollment[]
   certificates Certificate[]
   schedules    Schedule[]
+  enquiries    Enquiry[]
 
   @@index([name])
   @@index([isActive])
@@ -432,6 +433,55 @@ model Schedule {
 
   @@unique([branchId, courseId, dayOfWeek])
   @@map("schedules")
+}
+
+// ─────────────────────────────────────────────
+// Enquiries (walk-in / phone leads captured at branch level)
+// ─────────────────────────────────────────────
+
+model Enquiry {
+  id                String    @id @default(cuid())
+  branchId          String
+  name              String
+  contactNo         String
+  source            String? // "How You Know About Dnyansetu"
+  courseEnrolledFor String?
+  enquiryDate       DateTime  @default(now())
+  address           String?
+  education         String?
+  dob               DateTime?
+  feeStructure      String? // free-text notes on the fee structure discussed
+  admissionTaken    Boolean   @default(false)
+  admissionDate     DateTime?
+  joiningDate       DateTime?
+  courseTime        String?
+  remark            String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  branch    Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  followUps EnquiryFollowUp[]
+
+  @@index([branchId])
+  @@index([enquiryDate])
+  @@map("enquiries")
+}
+
+// ─────────────────────────────────────────────
+// Enquiry Follow-ups (the "Follow Up" tracking table on the paper form)
+// ─────────────────────────────────────────────
+
+model EnquiryFollowUp {
+  id        String   @id @default(cuid())
+  enquiryId String
+  date      DateTime
+  note      String
+  createdAt DateTime @default(now())
+
+  enquiry Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([enquiryId])
+  @@map("enquiry_follow_ups")
 }
 
 // ─────────────────────────────────────────────

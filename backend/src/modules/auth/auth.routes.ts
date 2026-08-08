@@ -7,10 +7,13 @@ import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
-// Apply a simple rate limiter on login to mitigate brute-force
+// Apply a simple rate limiter on login to mitigate brute-force. Branches sit behind a
+// single NAT'd office IP with several staff logging in around the same time, so the
+// limit is per-IP-shared-by-many, not per-user — kept generous to avoid locking out
+// legitimate concurrent logins while still capping runaway credential-stuffing.
 const loginLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 10, // limit each IP to 10 requests per windowMs
+	max: 50, // limit each IP to 50 requests per windowMs
 	standardHeaders: true,
 	legacyHeaders: false,
 });
