@@ -11,8 +11,15 @@
 export const dayPickerClassNames = {
   months: 'flex',
   month: 'grid grid-cols-[auto_1fr_auto] items-center gap-1',
-  month_caption: 'text-center py-1',
-  caption_label: 'text-[14px] font-bold text-[#1A2332]',
+  month_caption: 'flex items-center justify-center gap-1 py-1',
+  caption_label: 'inline-flex items-center gap-1 text-[14px] font-bold text-[#1A2332]',
+  // Dropdown mode (month/year selects, used by DateInput for fast year navigation e.g.
+  // date of birth): `dropdown_root` wraps a real <select> stacked on top of the visible
+  // `caption_label` text — the select is transparent and sized to fill its parent so the
+  // whole pill is clickable, while the label underneath renders the current value + chevron.
+  dropdowns: 'flex items-center justify-center gap-1',
+  dropdown_root: 'relative inline-flex items-center rounded-md px-2 py-1 hover:bg-gray-100 focus-within:ring-1 focus-within:ring-[#4DB8CA] transition-colors',
+  dropdown: 'absolute inset-0 h-full w-full opacity-0 cursor-pointer appearance-none border-none bg-transparent',
   button_previous:
     'h-7 w-7 flex items-center justify-center rounded-full text-[#64748B] hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent',
   button_next:

@@ -208,7 +208,7 @@ const SuperAdminDashboard: React.FC = () => {
             >
               {branches.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.name || b.location || b.branchCode}
+                  {b.location || b.name || b.branchCode}
                 </option>
               ))}
             </select>

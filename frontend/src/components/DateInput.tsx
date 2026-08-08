@@ -51,6 +51,13 @@ const DateInput: React.FC<DateInputProps> = ({
   if (minDate) disabledMatchers.push({ before: minDate });
   if (maxDate) disabledMatchers.push({ after: maxDate });
 
+  // Bounds for the month/year dropdowns — fall back to a generous range (100 years
+  // back, 50 years ahead) so fields like date of birth don't force endless clicking
+  // through "previous month" to reach an old year.
+  const currentYear = new Date().getFullYear();
+  const startMonth = minDate ?? new Date(currentYear - 100, 0, 1);
+  const endMonth = maxDate ?? new Date(currentYear + 50, 11, 1);
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -72,6 +79,9 @@ const DateInput: React.FC<DateInputProps> = ({
           <DayPicker
             mode="single"
             navLayout="around"
+            captionLayout="dropdown"
+            startMonth={startMonth}
+            endMonth={endMonth}
             selected={parseYMD(value)}
             onSelect={(date) => {
               onChange(date ? formatYMD(date) : '');
