@@ -31,7 +31,7 @@ export const update = asyncHandler(async (req: AuthRequest, res: Response): Prom
 
 // DELETE /api/courses/:id
 export const remove = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-  await courseService.softDeleteCourse(req.params.id as string);
+  await courseService.deleteCourse(req.params.id as string);
   sendSuccess(res, null, 'Course deleted');
 });
 

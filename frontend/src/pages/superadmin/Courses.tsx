@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Eye, Trash2, Plus, X, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, ExternalLink, CheckCircle2, Loader2, Upload, Download } from 'lucide-react';
+import { Search, Eye, Edit2, Trash2, Plus, X, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, ExternalLink, CheckCircle2, Loader2, Upload, Download } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { courseService } from '@/services/course.service';
@@ -162,6 +162,8 @@ const Courses: React.FC = () => {
   const [showCourseSuccess, setShowCourseSuccess] = useState(false);
   const [newCourseName, setNewCourseName] = useState('');
   const [newCourseError, setNewCourseError] = useState<string | null>(null);
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [savingCourse, setSavingCourse] = useState(false);
   const [viewPapers, setViewPapers] = useState(false);
   const [viewCourseId, setViewCourseId] = useState('');
   const [viewCourseName, setViewCourseName] = useState('');
@@ -315,6 +317,20 @@ const Courses: React.FC = () => {
     }
   };
 
+  const openAddCourseTab = () => {
+    setEditingCourseId(null);
+    setNewCourseName('');
+    setNewCourseError(null);
+    setActiveTab('add-course');
+  };
+
+  const openEditCourseTab = (course: Course) => {
+    setEditingCourseId(course.id);
+    setNewCourseName(course.name);
+    setNewCourseError(null);
+    setActiveTab('add-course');
+  };
+
   const fetchPapers = async (courseId: string) => {
     setLoadingPapers(true);
     try {
@@ -360,7 +376,7 @@ const Courses: React.FC = () => {
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => (tab === 'add-course' ? openAddCourseTab() : setActiveTab(tab))}
                 className={cn(
                   'px-6 py-2.5 rounded-[6px] text-[15px] font-medium transition-colors',
                   activeTab === tab ? 'bg-[#C8102E] text-white' : 'text-[#1A2332] hover:bg-gray-50'
@@ -416,13 +432,20 @@ const Courses: React.FC = () => {
                       <div className="flex items-center justify-center gap-3">
                         <button
                           className="text-[#4DB8CA] border border-[#4DB8CA] rounded-[4px] p-1.5 hover:bg-[#E6F6F9] transition-colors"
-                          onClick={() => { 
+                          onClick={() => {
                             setViewCourseId(course.id);
-                            setViewCourseName(course.name); 
-                            setViewPapers(true); 
+                            setViewCourseName(course.name);
+                            setViewPapers(true);
                           }}
                         >
                           <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => openEditCourseTab(course)}
+                          title="Edit"
+                          className="text-[#0A3D4D] border border-[#0A3D4D] rounded-[4px] p-1.5 hover:bg-gray-100 transition-colors"
+                        >
+                          <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(course)}
@@ -556,9 +579,15 @@ const Courses: React.FC = () => {
         </div>
       )}
 
-      {/* === ADD NEW COURSE === */}
+      {/* === ADD / EDIT COURSE === */}
       {!viewPapers && activeTab === 'add-course' && (
         <div className="bg-white rounded-[16px] border border-[#E2E8F0] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-8">
+          {editingCourseId && (
+            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-[#E2E8F0]">
+              <span className="text-[13px] font-semibold text-[#4DB8CA] bg-[#E6F6F9] px-3 py-1 rounded-full">Editing Course</span>
+              <span className="text-[13px] text-[#64748B]">— modify the name below and save</span>
+            </div>
+          )}
           <div className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-[14px] font-semibold text-[#1A2332]">
@@ -584,30 +613,37 @@ const Courses: React.FC = () => {
               </div>
             
             <div className="flex items-center justify-end gap-6 pt-6 border-t border-[#E2E8F0] mt-8">
-              <button onClick={() => setActiveTab('all')} className="text-[14px] font-medium text-[#64748B] hover:text-[#1A2332] transition-colors">
+              <button onClick={() => { setActiveTab('all'); setEditingCourseId(null); }} className="text-[14px] font-medium text-[#64748B] hover:text-[#1A2332] transition-colors">
                 Cancel
               </button>
-              <button 
+              <button
+                disabled={savingCourse}
                 onClick={async () => {
+                  if (!newCourseName.trim()) {
+                    setNewCourseError('Course name is required');
+                    return;
+                  }
+                  setNewCourseError(null);
+                  setSavingCourse(true);
                   try {
-                    if (!newCourseName.trim()) {
-                      setNewCourseError('Course name is required');
-                      return;
+                    if (editingCourseId) {
+                      await courseService.update(editingCourseId, { name: newCourseName.trim() });
+                    } else {
+                      await courseService.create({ name: newCourseName.trim() });
                     }
-                    await courseService.create({ name: newCourseName.trim() });
                     setShowCourseSuccess(true);
-                    setNewCourseName('');
-                    setNewCourseError(null);
                     fetchCourses();
-                  } catch (err) {
-                    console.error('Failed to create course', err);
-                    setNewCourseError('Failed to create course');
+                  } catch (err: any) {
+                    console.error('Failed to save course', err);
+                    setNewCourseError(err?.response?.data?.message || 'Failed to save course');
+                  } finally {
+                    setSavingCourse(false);
                   }
                 }}
-                className="flex items-center gap-2 px-8 py-3 bg-[#C8102E] text-white rounded-[6px] text-[15px] font-medium hover:bg-red-800 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-8 py-3 bg-[#C8102E] text-white rounded-[6px] text-[15px] font-medium hover:bg-red-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Plus size={18} />
-                Add Course
+                {savingCourse ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                {savingCourse ? 'Saving...' : editingCourseId ? 'Update Course' : 'Add Course'}
               </button>
             </div>
           </div>
@@ -860,9 +896,21 @@ const Courses: React.FC = () => {
       {/* Success modal */}
       {showCourseSuccess && (
         <SuccessModal
-          title={`"${newCourseName}"\nHas Been Successfully Added!`}
-          btnLabel="Add New Course"
-          onClose={() => { setShowCourseSuccess(false); setActiveTab('add-course'); }}
+          title={editingCourseId
+            ? `"${newCourseName}"\nHas Been Successfully Updated!`
+            : `"${newCourseName}"\nHas Been Successfully Added!`}
+          btnLabel={editingCourseId ? 'Back to All Courses' : 'Add New Course'}
+          onClose={() => {
+            const wasEditing = !!editingCourseId;
+            setShowCourseSuccess(false);
+            if (wasEditing) {
+              setEditingCourseId(null);
+              setNewCourseName('');
+              setActiveTab('all');
+            } else {
+              openAddCourseTab();
+            }
+          }}
         />
       )}
     </div>

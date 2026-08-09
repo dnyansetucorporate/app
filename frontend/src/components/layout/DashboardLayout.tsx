@@ -17,6 +17,7 @@ import {
   Menu,
   LogOut,
   Settings,
+  Wallet,
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -43,6 +44,7 @@ const getNavItems = (role: UserRole): NavItem[] => {
       { to: '/super-admin/courses', icon: BookOpen, label: 'Courses', matchSegment: 'courses' },
       { to: '/super-admin/exams', icon: FileText, label: 'Exams', matchSegment: 'exams' },
       { to: '/super-admin/certificates', icon: Award, label: 'Certificates', matchSegment: 'certificates' },
+      { to: '/super-admin/expenses', icon: Wallet, label: 'Expenses', matchSegment: 'expenses' },
     ];
   }
   

@@ -509,6 +509,23 @@ model RefreshToken {
 }
 
 // ─────────────────────────────────────────────
+// Expenses (Super Admin income/expense ledger)
+// ─────────────────────────────────────────────
+
+model Expense {
+  id           String   @id @default(cuid())
+  date         DateTime
+  totalIncome  Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpense Decimal  @default(0) @db.Decimal(10, 2)
+  comment      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([date])
+  @@map("expenses")
+}
+
+// ─────────────────────────────────────────────
 // Public Website Enquiries (student + franchise forms on the marketing site)
 // ─────────────────────────────────────────────
 
