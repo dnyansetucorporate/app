@@ -42,7 +42,7 @@ const LoginPage: React.FC = () => {
     <div className="flex flex-col items-center">
       {/* Logo */}
       <div className="mb-6">
-        <img src="/logo.svg" alt="Dnyansetu Logo" className="h-14 w-auto object-contain" />
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dnyansetu Logo" className="h-14 w-auto object-contain" />
       </div>
 
       <h2 className="text-xl font-bold text-center text-text-dark mb-1">Sign in to continue</h2>

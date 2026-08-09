@@ -224,7 +224,7 @@ const Certificates: React.FC = () => {
 
   // ── Student Certificate HTML (matches Figma design) ────────────────────────
   const studentCertificateHtml = (cert: any, photoDataUrl?: string | null) => {
-    const o = window.location.origin;
+    const o = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
     const firstName   = cert.student?.firstName  || '';
     const middleName  = cert.student?.middleName || '';
     const lastName    = cert.student?.lastName   || '';
@@ -355,7 +355,7 @@ body{background:#e5e7eb;font-family:'Montserrat',sans-serif;}
 
   // ── Student Invoice HTML (matches Figma design) ─────────────────────────────
   const studentInvoiceHtml = (cert: any, payments: any[]) => {
-    const o = window.location.origin;
+    const o = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
     const studentName    = `${cert.student?.firstName || ''} ${cert.student?.lastName || ''}`.trim() || 'N/A';
     const invoiceNo      = cert.invoiceNo || cert.id?.slice(-4) || '0001';
     const today          = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');

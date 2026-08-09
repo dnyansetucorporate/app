@@ -45,6 +45,11 @@ enum Gender {
   OTHER
 }
 
+enum WebsiteEnquiryType {
+  STUDENT
+  FRANCHISE
+}
+
 // ─────────────────────────────────────────────
 // Users (Super Admin + Branch Admin accounts)
 // ─────────────────────────────────────────────
@@ -501,4 +506,25 @@ model RefreshToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────
+// Public Website Enquiries (student + franchise forms on the marketing site)
+// ─────────────────────────────────────────────
+
+model WebsiteEnquiry {
+  id        String             @id @default(cuid())
+  type      WebsiteEnquiryType
+  fullName  String
+  phone     String
+  email     String?
+  course    String? // set when type = STUDENT
+  city      String? // set when type = FRANCHISE
+  message   String?
+  ipAddress String?
+  createdAt DateTime           @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("website_enquiries")
 }

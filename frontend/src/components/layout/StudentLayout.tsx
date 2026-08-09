@@ -12,7 +12,7 @@ const StudentLayout: React.FC = () => {
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.23]"
         style={{
-          backgroundImage: `url('/student-bg-pattern.png')`,
+          backgroundImage: `url('${import.meta.env.BASE_URL}student-bg-pattern.png')`,
           backgroundSize: '560px',
           backgroundPosition: 'center',
           backgroundRepeat: 'repeat',
@@ -22,7 +22,7 @@ const StudentLayout: React.FC = () => {
 
       <header className="relative z-10 w-full px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-           <img src="/logo.svg" alt="Dnyansetu" className="h-14 w-auto object-contain" />
+           <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dnyansetu" className="h-14 w-auto object-contain" />
         </div>
         <div className="flex items-center gap-4">
           <div id="student-header-right" />

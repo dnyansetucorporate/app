@@ -216,7 +216,7 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
         </div>
         <button
-          onClick={() => selectedBranch && window.location.assign(`/super-admin/branches`)}
+          onClick={() => selectedBranch && window.location.assign(`${import.meta.env.BASE_URL}super-admin/branches`)}
           className="flex items-center gap-2 h-10 px-5 bg-white border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#1A2332] hover:bg-gray-50 transition-colors shadow-sm"
         >
           <Eye size={16} className="text-[#4DB8CA]" />
