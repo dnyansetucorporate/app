@@ -62,28 +62,64 @@ export const getCourseById = async (id: string) => {
 };
 
 export const createCourse = async (data: CreateCourseDto) => {
+  const existing = await prisma.course.findUnique({ where: { name: data.name } });
+  if (existing) {
+    if (existing.isActive) {
+      throw Object.assign(new Error('A course with this name already exists'), { status: 409 });
+    }
+    // Name belongs to a previously soft-deleted course — reactivate it instead of
+    // hitting the unique constraint on `name`, restoring its old question papers.
+    return prisma.course.update({
+      where: { id: existing.id },
+      data: { isActive: true, description: data.description },
+    });
+  }
+
   return prisma.course.create({
     data: { name: data.name, description: data.description },
   });
 };
 
 export const updateCourse = async (id: string, data: Partial<CreateCourseDto>) => {
+  if (data.name) {
+    const existing = await prisma.course.findUnique({ where: { name: data.name } });
+    if (existing && existing.id !== id) {
+      throw Object.assign(new Error('A course with this name already exists'), { status: 409 });
+    }
+  }
+
   return prisma.course.update({
     where: { id },
     data,
   });
 };
 
-export const softDeleteCourse = async (id: string) => {
+export const deleteCourse = async (id: string) => {
   const activeEnrollments = await prisma.enrollment.count({
     where: { courseId: id, paymentStatus: { in: ['FULL_PAID', 'PARTIAL_PAID'] } },
   });
   if (activeEnrollments > 0) {
     throw Object.assign(
-      new Error(`Cannot deactivate course with ${activeEnrollments} active enrollment(s). Complete or cancel them first.`),
+      new Error(`Cannot delete course with ${activeEnrollments} active enrollment(s). Complete or cancel them first.`),
       { status: 409 }
     );
   }
+
+  // Only safe to remove permanently when nothing else references it —
+  // question papers cascade-delete with the course, but Enrollment/ExamCourse
+  // rows don't, so a hard delete would otherwise fail with a FK constraint
+  // error (or, for papers, silently wipe out historical exam content).
+  const [questionPapers, enrollments, examCourses] = await Promise.all([
+    prisma.questionPaper.count({ where: { courseId: id } }),
+    prisma.enrollment.count({ where: { courseId: id } }),
+    prisma.examCourse.count({ where: { courseId: id } }),
+  ]);
+
+  if (questionPapers === 0 && enrollments === 0 && examCourses === 0) {
+    await prisma.course.delete({ where: { id } });
+    return;
+  }
+
   await prisma.course.update({ where: { id }, data: { isActive: false } });
 };
 

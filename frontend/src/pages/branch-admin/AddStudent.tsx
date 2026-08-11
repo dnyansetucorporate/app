@@ -264,7 +264,7 @@ const AddStudent: React.FC = () => {
       branchAddress: branchInfo?.address || 'Hadapsar, Pune',
       branchPhone: branchInfo?.phone1 || '+91 987 654 3210',
       branchEmail: branchInfo?.adminEmail || 'dnyansetu@gmail.com',
-      logoUrl: `${window.location.origin}/logo-invoice.png`,
+      logoUrl: `${window.location.origin}${import.meta.env.BASE_URL}logo-invoice.png`,
     });
     if (!ok) toast.error('Unable to open print window. Please allow popups for this site.');
   };

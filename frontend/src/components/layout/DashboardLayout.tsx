@@ -17,6 +17,7 @@ import {
   Menu,
   LogOut,
   Settings,
+  Wallet,
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -43,6 +44,7 @@ const getNavItems = (role: UserRole): NavItem[] => {
       { to: '/super-admin/courses', icon: BookOpen, label: 'Courses', matchSegment: 'courses' },
       { to: '/super-admin/exams', icon: FileText, label: 'Exams', matchSegment: 'exams' },
       { to: '/super-admin/certificates', icon: Award, label: 'Certificates', matchSegment: 'certificates' },
+      { to: '/super-admin/expenses', icon: Wallet, label: 'Expenses', matchSegment: 'expenses' },
     ];
   }
   
@@ -267,7 +269,7 @@ const DashboardLayoutInner: React.FC<{ isActive: (s: string) => boolean }> = ({ 
       <aside className="hidden md:flex md:w-52 bg-[#0A3D4D] text-white flex-col flex-shrink-0 z-30 shadow-xl">
         {/* Logo - White Container */}
         <div className="bg-white h-auto sm:h-20 flex items-center px-4 sm:px-6 border-b border-border">
-          <img src="/logo.svg" alt="Dnyansetu" className="h-10 w-auto" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dnyansetu" className="h-10 w-auto" />
         </div>
 
         {/* Nav */}
@@ -332,7 +334,7 @@ const DashboardLayoutInner: React.FC<{ isActive: (s: string) => boolean }> = ({ 
           <div className="fixed inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-64 bg-[#0A3D4D] text-white p-4 overflow-y-auto">
             <div className="bg-white h-20 flex items-center px-4 border-b border-border">
-              <img src="/logo.svg" alt="Dnyansetu" className="h-10 w-auto" />
+              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dnyansetu" className="h-10 w-auto" />
             </div>
             <nav className="mt-4 space-y-1">
               {navItems.map((item) => (

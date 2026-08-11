@@ -73,7 +73,7 @@ const Students: React.FC = () => {
       branchAddress: student.branch?.address || 'Hadapsar, Pune',
       branchPhone: student.branch?.phone1 || '+91 987 654 3210',
       branchEmail: student.branch?.admin?.email || 'dnyansetu@gmail.com',
-      logoUrl: `${window.location.origin}/logo-invoice.png`,
+      logoUrl: `${window.location.origin}${import.meta.env.BASE_URL}logo-invoice.png`,
     });
   };
 

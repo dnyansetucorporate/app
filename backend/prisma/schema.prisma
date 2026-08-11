@@ -45,6 +45,11 @@ enum Gender {
   OTHER
 }
 
+enum WebsiteEnquiryType {
+  STUDENT
+  FRANCHISE
+}
+
 // ─────────────────────────────────────────────
 // Users (Super Admin + Branch Admin accounts)
 // ─────────────────────────────────────────────
@@ -501,4 +506,42 @@ model RefreshToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────
+// Expenses (Super Admin income/expense ledger)
+// ─────────────────────────────────────────────
+
+model Expense {
+  id           String   @id @default(cuid())
+  date         DateTime
+  totalIncome  Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpense Decimal  @default(0) @db.Decimal(10, 2)
+  comment      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([date])
+  @@map("expenses")
+}
+
+// ─────────────────────────────────────────────
+// Public Website Enquiries (student + franchise forms on the marketing site)
+// ─────────────────────────────────────────────
+
+model WebsiteEnquiry {
+  id        String             @id @default(cuid())
+  type      WebsiteEnquiryType
+  fullName  String
+  phone     String
+  email     String?
+  course    String? // set when type = STUDENT
+  city      String? // set when type = FRANCHISE
+  message   String?
+  ipAddress String?
+  createdAt DateTime           @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("website_enquiries")
 }

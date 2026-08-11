@@ -56,8 +56,9 @@ api.interceptors.response.use(
       // If refresh failed, clear client state and redirect
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
-      if (window.location.pathname !== '/auth/login') {
-        window.location.href = '/auth/login';
+      const loginPath = `${import.meta.env.BASE_URL}auth/login`;
+      if (window.location.pathname !== loginPath) {
+        window.location.href = loginPath;
       }
     }
 

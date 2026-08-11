@@ -49,7 +49,7 @@ interface Payment {
 
 
 const DnyanSetuLogo: React.FC = () => (
-  <img src="/logo-invoice.png" style={{ height: '54px', width: 'auto', display: 'block' }} alt="DnyanSetu" />
+  <img src={`${import.meta.env.BASE_URL}logo-invoice.png`} style={{ height: '54px', width: 'auto', display: 'block' }} alt="DnyanSetu" />
 );
 
 const MetaLabel: React.FC<{ label: string; value: string }> = ({ label, value }) => (

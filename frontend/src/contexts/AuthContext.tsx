@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logoutTimerRef.current = window.setTimeout(() => {
       authService.logout();
       setUser(null);
-      window.location.href = '/auth/login';
+      window.location.href = `${import.meta.env.BASE_URL}auth/login`;
     }, ms + 500);
   };
 

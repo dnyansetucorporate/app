@@ -86,7 +86,7 @@ export const downloadAsPng = (html: string, filename: string): Promise<void> => 
 };
 
 export const branchCertificateHtml = (branch: any): string => {
-  const o = window.location.origin;
+  const o = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
   const validUpto = branch.validUpto
     ? formatCalendarDate(branch.validUpto, { month: 'short', year: 'numeric' }, 'en-US')
     : 'N/A';

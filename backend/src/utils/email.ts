@@ -141,6 +141,55 @@ export const sendPasswordDistributionEmail = async (
 };
 
 /**
+ * Notify the institute of a new public website enquiry (student or franchise form)
+ */
+export const sendWebsiteEnquiryNotification = async (enquiry: {
+  id: string;
+  type: 'STUDENT' | 'FRANCHISE';
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  course?: string | null;
+  city?: string | null;
+  message?: string | null;
+  createdAt: Date;
+}) => {
+  const notifyTo = process.env.WEBSITE_ENQUIRY_NOTIFY_EMAIL;
+  if (!notifyTo) return false;
+
+  const isStudent = enquiry.type === 'STUDENT';
+  const submittedAt = enquiry.createdAt.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || 'noreply@education.com',
+      to: notifyTo,
+      replyTo: enquiry.email || undefined,
+      subject: `New ${isStudent ? 'Student' : 'Franchise'} Enquiry #${enquiry.id} — ${isStudent ? enquiry.course : enquiry.city}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>New ${isStudent ? 'Student' : 'Franchise'} Enquiry</h2>
+          <p><strong>Submitted:</strong> ${submittedAt}</p>
+          <table style="border-collapse: collapse; margin: 12px 0;">
+            <tr><td style="padding: 6px 12px; color: #666;">Name</td><td style="padding: 6px 12px;"><strong>${enquiry.fullName}</strong></td></tr>
+            <tr><td style="padding: 6px 12px; color: #666;">Phone</td><td style="padding: 6px 12px;"><strong>${enquiry.phone}</strong></td></tr>
+            <tr><td style="padding: 6px 12px; color: #666;">Email</td><td style="padding: 6px 12px;">${enquiry.email || 'Not provided'}</td></tr>
+            ${isStudent
+              ? `<tr><td style="padding: 6px 12px; color: #666;">Course</td><td style="padding: 6px 12px;">${enquiry.course}</td></tr>`
+              : `<tr><td style="padding: 6px 12px; color: #666;">City</td><td style="padding: 6px 12px;">${enquiry.city}</td></tr>`}
+            <tr><td style="padding: 6px 12px; color: #666; vertical-align: top;">Message</td><td style="padding: 6px 12px;">${enquiry.message || 'No message'}</td></tr>
+          </table>
+        </div>
+      `,
+    });
+    return true;
+  } catch (error) {
+    console.error('Website enquiry notification email failed:', error);
+    return false;
+  }
+};
+
+/**
  * Verify email configuration
  */
 export const verifyEmailConfig = async () => {

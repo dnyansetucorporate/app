@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DnyanSetu Education &amp; IT Institute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="CSS/courses.css">
+  <link rel="icon" type="image/png" href="images/D_favicon_512.png">
+  <link rel="stylesheet" href="CSS/home.css">
+
+</head>
+
+<body>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="container-fluid top-bar-inner">
+    <a href="index.html" class="brand">
+      <img src="images/logo main.png" alt="DnyanSetu Logo">
+    </a>
+    <img src="images/iso_logo_no_bg.png" alt="ISO Certified" class="iso-logo">
+  </div>
+</div>
+
+<header class="site-header" id="siteHeader">
+  <div class="container-fluid nav-wrap">
+    <nav class="nav-links" id="mobMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="courses.html" class="active">Courses</a>
+      <a href="contact.html">Contact</a>
+      <a href="contact.html" class="nav-cta">Enroll Today</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="/app/verify-certificate" class="nav-verify"><i class="fas fa-certificate"></i> Verify Certificate</a>
+      <a href="/app/auth/login" class="nav-login"><i class="fas fa-user"></i> Log In</a>
+    </div>
+    <button class="menu-toggle" id="hamBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<section class="courses-hero">
+  <div class="courses-hero-inner">
+    <div class="hero-badge">📚 50+ Professional Courses</div>
+    <h1>Explore Our <span>Courses</span></h1>
+    <p>Choose from our wide range of certificate, diploma and modular courses designed to shape your career</p>
+    <div class="hero-stats">
+      <div class="hstat"><strong data-count="50">0</strong><span>Courses</span></div>
+      <div class="hstat-divider"></div>
+      <div class="hstat"><strong data-count="500">0</strong><span>Students Trained</span></div>
+      <div class="hstat-divider"></div>
+      <div class="hstat"><strong data-count="10">0</strong><span>Years Experience</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="search-sticky-wrap">
+  <div class="search-bar-container">
+    <div class="search-bar-inner">
+      <i class="fas fa-search"></i>
+      <input type="text" id="courseSearch" placeholder="Search any course, e.g. Tally, Java, AutoCAD…" oninput="filterCourses(this.value)">
+      <button class="search-clear" id="clearBtn" onclick="clearSearch()" style="display:none;" title="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-result-count" id="resultCount"></div>
+  </div>
+</div>
+
+<!-- CERTIFICATE & DIPLOMA -->
+<div class="section-block animate-on-scroll">
+  <div class="section-header">
+    <div class="section-label">Certificate &amp; Diploma Courses</div>
+  </div>
+  <table class="course-table">
+    <thead><tr><th>Code</th><th>Course Name</th><th>Duration</th><th>Know More</th></tr></thead>
+    <tbody id="certTableBody">
+      <tr><td>301</td><td>Master Diploma Course In Computer Software Teacher Education (MDCSTE)</td><td class="td-dur">1 Year</td><td class="td-btn"><button class="btn-know" onclick="showPopup('301')">Know More</button></td></tr>
+      <tr><td>302</td><td>Advance Diploma Course In Software Testing (ADST)</td><td class="td-dur">1 Year</td><td class="td-btn"><button class="btn-know" onclick="showPopup('302')">Know More</button></td></tr>
+      <tr><td>303</td><td>Master Diploma Course In Computer Software Application (MDCSA)</td><td class="td-dur">1 Year</td><td class="td-btn"><button class="btn-know" onclick="showPopup('303')">Know More</button></td></tr>
+      <tr><td>304</td><td>Master Diploma Course In Computer Software Engineering (MDCSE)</td><td class="td-dur">1 Year</td><td class="td-btn"><button class="btn-know" onclick="showPopup('304')">Know More</button></td></tr>
+      <tr><td>305</td><td>Certificate Course In Software Testing</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('305')">Know More</button></td></tr>
+      <tr><td>306</td><td>Certificate Course In Computerised Data Entry Operator (CCDEO)</td><td class="td-dur">4 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('306')">Know More</button></td></tr>
+      <tr><td>307</td><td>Diploma Course In Computer Teacher Education (DCTE)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('307')">Know More</button></td></tr>
+      <tr><td>308</td><td>Diploma Course In Computer Software Application (DCSA)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('308')">Know More</button></td></tr>
+      <tr><td>309</td><td>Diploma Course In Hardware And Networking (DHN)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('309')">Know More</button></td></tr>
+      <tr><td>310</td><td>Diploma Course In Software Testing (DST)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('310')">Know More</button></td></tr>
+      <tr><td>311</td><td>Diploma Course In Graphic Designing (DGD)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('311')">Know More</button></td></tr>
+      <tr><td>312</td><td>Diploma Course In Data Analysis (DDA)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('312')">Know More</button></td></tr>
+      <tr><td>313</td><td>Diploma Course In Web Page Designing (DWPD)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('313')">Know More</button></td></tr>
+      <tr><td>314</td><td>Diploma Course In Computerised Advance Accounting (DCAA)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('314')">Know More</button></td></tr>
+      <tr><td>315</td><td>Diploma Course In Computer Software Engineering (DCSE)</td><td class="td-dur">6 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('315')">Know More</button></td></tr>
+    </tbody>
+  </table>
+  <div class="course-cards">
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">301</span><div><div class="course-card-name">Master Diploma In Computer Software Teacher Education (MDCSTE)</div><div class="course-card-dur">1 Year</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('301')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">302</span><div><div class="course-card-name">Advance Diploma In Software Testing (ADST)</div><div class="course-card-dur">1 Year</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('302')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">303</span><div><div class="course-card-name">Master Diploma In Computer Software Application (MDCSA)</div><div class="course-card-dur">1 Year</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('303')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">304</span><div><div class="course-card-name">Master Diploma In Computer Software Engineering (MDCSE)</div><div class="course-card-dur">1 Year</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('304')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">305</span><div><div class="course-card-name">Certificate Course In Software Testing</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('305')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">306</span><div><div class="course-card-name">Certificate Course In Computerised Data Entry Operator (CCDEO)</div><div class="course-card-dur">4 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('306')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">307</span><div><div class="course-card-name">Diploma In Computer Teacher Education (DCTE)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('307')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">308</span><div><div class="course-card-name">Diploma In Computer Software Application (DCSA)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('308')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">309</span><div><div class="course-card-name">Diploma In Hardware And Networking (DHN)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('309')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">310</span><div><div class="course-card-name">Diploma In Software Testing (DST)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('310')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">311</span><div><div class="course-card-name">Diploma In Graphic Designing (DGD)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('311')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">312</span><div><div class="course-card-name">Diploma In Data Analysis (DDA)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('312')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">313</span><div><div class="course-card-name">Diploma In Web Page Designing (DWPD)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('313')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">314</span><div><div class="course-card-name">Diploma In Computerised Advance Accounting (DCAA)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('314')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">315</span><div><div class="course-card-name">Diploma In Computer Software Engineering (DCSE)</div><div class="course-card-dur">6 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('315')">Know More</button></div></div>
+  </div>
+</div>
+
+<!-- MODULAR -->
+<div class="section-block animate-on-scroll">
+  <div class="section-label">Modular Courses</div>
+  <br><br>
+  <table class="course-table">
+    <thead><tr><th>Code</th><th>Course Name</th><th>Duration</th><th>Know More</th></tr></thead>
+    <tbody>
+      <tr><td>401</td><td>MS-Office</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('401')">Know More</button></td></tr>
+      <tr><td>402</td><td>MS Excel</td><td class="td-dur">22 Days</td><td class="td-btn"><button class="btn-know" onclick="showPopup('402')">Know More</button></td></tr>
+      <tr><td>403</td><td>Tally</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('403')">Know More</button></td></tr>
+      <tr><td>404</td><td>GST</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('404')">Know More</button></td></tr>
+      <tr><td>405</td><td>Tally With GST</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('405')">Know More</button></td></tr>
+      <tr><td>406</td><td>Tally Prime Master</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('406')">Know More</button></td></tr>
+      <tr><td>407</td><td>2D CAD</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('407')">Know More</button></td></tr>
+      <tr><td>408</td><td>3D CAD</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('408')">Know More</button></td></tr>
+      <tr><td>409</td><td>AutoCAD</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('409')">Know More</button></td></tr>
+      <tr><td>410</td><td>Photoshop</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('410')">Know More</button></td></tr>
+      <tr><td>411</td><td>CorelDraw</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('411')">Know More</button></td></tr>
+      <tr><td>412</td><td>C Programming</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('412')">Know More</button></td></tr>
+      <tr><td>413</td><td>C++ Programming</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('413')">Know More</button></td></tr>
+      <tr><td>414</td><td>HTML</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('414')">Know More</button></td></tr>
+      <tr><td>415</td><td>PHP</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('415')">Know More</button></td></tr>
+      <tr><td>416</td><td>Visual Basic</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('416')">Know More</button></td></tr>
+      <tr><td>417</td><td>Oracle</td><td class="td-dur">1 Month</td><td class="td-btn"><button class="btn-know" onclick="showPopup('417')">Know More</button></td></tr>
+      <tr><td>418</td><td>Advance Excel</td><td class="td-dur">1.5 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('418')">Know More</button></td></tr>
+      <tr><td>419</td><td>Marathi Typing 30 wpm</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('419')">Know More</button></td></tr>
+      <tr><td>420</td><td>Marathi Typing 40 wpm</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('420')">Know More</button></td></tr>
+      <tr><td>421</td><td>English Typing 30 wpm</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('421')">Know More</button></td></tr>
+      <tr><td>422</td><td>English Typing 40 wpm</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('422')">Know More</button></td></tr>
+      <tr><td>423</td><td>Core Java</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('423')">Know More</button></td></tr>
+      <tr><td>424</td><td>Advance Java</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('424')">Know More</button></td></tr>
+      <tr><td>425</td><td>ASP.NET</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('425')">Know More</button></td></tr>
+      <tr><td>426</td><td>VB.NET</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('426')">Know More</button></td></tr>
+      <tr><td>427</td><td>C#.NET</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('427')">Know More</button></td></tr>
+      <tr><td>428</td><td>MySQL</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('428')">Know More</button></td></tr>
+      <tr><td>429</td><td>3Ds MAX</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('429')">Know More</button></td></tr>
+      <tr><td>430</td><td>3Ds MAX With VRAY</td><td class="td-dur">3 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('430')">Know More</button></td></tr>
+      <tr><td>431</td><td>Power BI</td><td class="td-dur">2 Months</td><td class="td-btn"><button class="btn-know" onclick="showPopup('431')">Know More</button></td></tr>
+    </tbody>
+  </table>
+  <div class="course-cards">
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">401</span><div><div class="course-card-name">MS-Office</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('401')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">402</span><div><div class="course-card-name">MS Excel</div><div class="course-card-dur">22 Days</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('402')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">403</span><div><div class="course-card-name">Tally</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('403')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">404</span><div><div class="course-card-name">GST</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('404')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">405</span><div><div class="course-card-name">Tally With GST</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('405')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">406</span><div><div class="course-card-name">Tally Prime Master</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('406')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">407</span><div><div class="course-card-name">2D CAD</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('407')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">408</span><div><div class="course-card-name">3D CAD</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('408')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">409</span><div><div class="course-card-name">AutoCAD</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('409')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">410</span><div><div class="course-card-name">Photoshop</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('410')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">411</span><div><div class="course-card-name">CorelDraw</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('411')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">412</span><div><div class="course-card-name">C Programming</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('412')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">413</span><div><div class="course-card-name">C++ Programming</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('413')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">414</span><div><div class="course-card-name">HTML</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('414')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">415</span><div><div class="course-card-name">PHP</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('415')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">416</span><div><div class="course-card-name">Visual Basic</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('416')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">417</span><div><div class="course-card-name">Oracle</div><div class="course-card-dur">1 Month</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('417')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">418</span><div><div class="course-card-name">Advance Excel</div><div class="course-card-dur">1.5 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('418')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">419</span><div><div class="course-card-name">Marathi Typing 30 wpm</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('419')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">420</span><div><div class="course-card-name">Marathi Typing 40 wpm</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('420')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">421</span><div><div class="course-card-name">English Typing 30 wpm</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('421')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">422</span><div><div class="course-card-name">English Typing 40 wpm</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('422')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">423</span><div><div class="course-card-name">Core Java</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('423')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">424</span><div><div class="course-card-name">Advance Java</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('424')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">425</span><div><div class="course-card-name">ASP.NET</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('425')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">426</span><div><div class="course-card-name">VB.NET</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('426')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">427</span><div><div class="course-card-name">C#.NET</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('427')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">428</span><div><div class="course-card-name">MySQL</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('428')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">429</span><div><div class="course-card-name">3Ds MAX</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('429')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">430</span><div><div class="course-card-name">3Ds MAX With VRAY</div><div class="course-card-dur">3 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('430')">Know More</button></div></div>
+    <div class="course-card"><div class="course-card-left"><span class="course-card-code">431</span><div><div class="course-card-name">Power BI</div><div class="course-card-dur">2 Months</div></div></div><div class="course-card-right"><button class="btn-know" onclick="showPopup('431')">Know More</button></div></div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopupOutside(event)">
+  <div class="popup-box" id="popupBox">
+    <button class="popup-close" onclick="closePopup()" title="Close">&#x2715;</button>
+    <div id="popupContent"></div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+
+      <div class="footer-col-brand">
+        <a href="index.html" class="brand">
+          <img src="images/logo main.png" alt="DnyanSetu Logo">
+        </a>
+        <p class="footer-text">Building practical knowledge, confidence and job-ready skills through focused training and guidance.</p>
+      </div>
+
+      <div class="footer-col">
+        <h3>Quick Links</h3>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="courses.html">Courses</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>Top Categories</h3>
+        <a href="courses.html">Computer Courses</a>
+        <a href="courses.html">Technical Courses</a>
+        <a href="courses.html">Beauty Parlour</a>
+        <a href="courses.html">Fashion Designing</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <p><i class="fas fa-location-dot"></i>Pune, Maharashtra, India</p>
+        <p><i class="fas fa-phone"></i>9960020908</p>
+        <p><i class="fas fa-envelope"></i>dnyansetucorporate@gmail.com</p>
+        <p><i class="fas fa-clock"></i>Fri – Wed: 8:00 AM – 8:00 PM</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; DnyanSetu Education &amp; IT Institute India Pvt. Ltd. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+/* ─── DATA ─── */
+const courses = {
+  '301':{name:'Master Diploma Course In Computer Software Teacher Education (MDCSTE)',dur:'1 Year',semesters:[{label:'Semester 1',items:['Windows Operating System','Computer Fundamentals','MS-Office','MS-Excel','Basic Tally','Graphic Design','Internet']},{label:'Semester 2',items:['C Programming','C++','Core Java','Basic Typing English/Marathi']}]},
+  '302':{name:'Advance Diploma Course In Software Testing (ADST)',dur:'1 Year',semesters:null},
+  '303':{name:'Master Diploma Course In Computer Software Application (MDCSA)',dur:'1 Year',semesters:[{label:'Semester 1',items:['Windows Operating System','Computer Fundamentals','MS-Office','Graphic Designing','Tally With GST','Internet']},{label:'Semester 2',items:['C Programming','C++','Core Java','Advance Java']}]},
+  '304':{name:'Master Diploma Course In Computer Software Engineering (MDCSE)',dur:'1 Year',semesters:[{label:'Semester 1',items:['C Programming','C++','Core Java','Advance Java']},{label:'Semester 2',items:['HTML','C#.NET','VB.NET','ASP.NET']}]},
+  '305':{name:'Certificate Course In Software Testing',dur:'3 Months',semesters:null},
+  '306':{name:'Certificate Course In Computerised Data Entry Operator (CCDEO)',dur:'4 Months',semesters:[{label:'Syllabus',items:['Computer Application','Computer Fundamentals','Windows Operating System','MS-Office','Basic Tally','Basic English Typing','Internet']}]},
+  '307':{name:'Diploma Course In Computer Teacher Education (DCTE)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Windows Operating System','Computer Fundamentals','MS-Office','MS-Excel','Basic Tally','Graphic Design','Internet']}]},
+  '308':{name:'Diploma Course In Computer Software Application (DCSA)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Windows Operating System','Computer Fundamentals','MS-Office','Graphic Designing','Tally With GST','Internet']}]},
+  '309':{name:'Diploma Course In Hardware And Networking (DHN)',dur:'6 Months',semesters:null},
+  '310':{name:'Diploma Course In Software Testing (DST)',dur:'6 Months',semesters:null},
+  '311':{name:'Diploma Course In Graphic Designing (DGD)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Computer Fundamentals','Windows Operating System','CorelDraw','Photoshop','Illustrator','In-Design','Internet']}]},
+  '312':{name:'Diploma Course In Data Analysis (DDA)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Advance Excel','Python','MySQL','Power BI']}]},
+  '313':{name:'Diploma Course In Web Page Designing (DWPD)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Windows Operating System','Computer Fundamentals','Graphic Designing','HTML','CSS','Javascript','Canvas']}]},
+  '314':{name:'Diploma Course In Computerised Advance Accounting (DCAA)',dur:'6 Months',semesters:[{label:'Syllabus',items:['Computer Application','Windows Operating System','MS-Office','Tally','GST','Banking','Auditing','Internet']}]},
+  '315':{name:'Diploma Course In Computer Software Engineering (DCSE)',dur:'6 Months',semesters:[{label:'Syllabus',items:['C Programming','C++','Core Java','Advance Java','HTML']}]},
+  '401':{name:'MS-Office',dur:'2 Months',semesters:null},'402':{name:'MS Excel',dur:'22 Days',semesters:null},
+  '403':{name:'Tally',dur:'2 Months',semesters:null},'404':{name:'GST',dur:'1 Month',semesters:null},
+  '405':{name:'Tally With GST',dur:'3 Months',semesters:null},'406':{name:'Tally Prime Master',dur:'3 Months',semesters:null},
+  '407':{name:'2D CAD',dur:'1 Month',semesters:null},'408':{name:'3D CAD',dur:'1 Month',semesters:null},
+  '409':{name:'AutoCAD',dur:'2 Months',semesters:null},'410':{name:'Photoshop',dur:'1 Month',semesters:null},
+  '411':{name:'CorelDraw',dur:'1 Month',semesters:null},'412':{name:'C Programming',dur:'1 Month',semesters:null},
+  '413':{name:'C++ Programming',dur:'1 Month',semesters:null},'414':{name:'HTML',dur:'1 Month',semesters:null},
+  '415':{name:'PHP',dur:'1 Month',semesters:null},'416':{name:'Visual Basic',dur:'2 Months',semesters:null},
+  '417':{name:'Oracle',dur:'1 Month',semesters:null},'418':{name:'Advance Excel',dur:'1.5 Months',semesters:null},
+  '419':{name:'Marathi Typing 30 wpm',dur:'3 Months',semesters:null},'420':{name:'Marathi Typing 40 wpm',dur:'3 Months',semesters:null},
+  '421':{name:'English Typing 30 wpm',dur:'3 Months',semesters:null},'422':{name:'English Typing 40 wpm',dur:'3 Months',semesters:null},
+  '423':{name:'Core Java',dur:'2 Months',semesters:null},'424':{name:'Advance Java',dur:'2 Months',semesters:null},
+  '425':{name:'ASP.NET',dur:'2 Months',semesters:null},'426':{name:'VB.NET',dur:'2 Months',semesters:null},
+  '427':{name:'C#.NET',dur:'2 Months',semesters:null},'428':{name:'MySQL',dur:'2 Months',semesters:null},
+  '429':{name:'3Ds MAX',dur:'2 Months',semesters:null},'430':{name:'3Ds MAX With VRAY',dur:'3 Months',semesters:null},
+  '431':{name:'Power BI',dur:'2 Months',semesters:null}
+};
+
+/* ─── POPUP ─── */
+function showPopup(code) {
+  const c = courses[code];
+  if (!c) return;
+
+  let html = `
+    <div class="popup-header-area">
+      <div class="popup-code">Course · ${code}</div>
+      <div class="popup-title">${c.name}</div>
+      <div class="popup-dur">${c.dur}</div>
+    </div>`;
+
+  if (c.semesters) {
+    html += `<div class="popup-syllabus"><h4>📋 Syllabus</h4>`;
+    c.semesters.forEach(s => {
+      html += `<div class="sem-block">
+        <div class="sem-label">${s.label}</div>
+        <ul class="sem-items">`;
+      s.items.forEach(i => { html += `<li>${i}</li>`; });
+      html += `</ul></div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `
+      <div class="popup-no-syl">
+        <div class="phone-icon">📚</div>
+        <p>Detailed syllabus available on request.</p>
+      </div>`;
+  }
+
+  html += `
+    <div class="popup-contact-strip">
+      <p>
+        <strong>To know the more details </strong>
+        <strong>Please Connect with DnyanSetu 🤙</strong>
+      </p>
+      <a href="tel:+919960020908" class="popup-call-btn">
+        📞 9960020908
+      </a>
+    </div>`;
+
+  document.getElementById('popupContent').innerHTML = html;
+  document.getElementById('popupOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closePopup(){
+  document.getElementById('popupOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function closePopupOutside(e){ if(e.target.id==='popupOverlay') closePopup(); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePopup(); });
+
+/* ─── SEARCH ─── */
+function filterCourses(query){
+  const q = query.trim().toLowerCase();
+  document.getElementById('clearBtn').style.display = q ? 'flex' : 'none';
+  let total = 0;
+  document.querySelectorAll('.course-table tbody tr').forEach(row=>{
+    const show = !q || row.textContent.toLowerCase().includes(q);
+    row.style.display = show ? '' : 'none';
+    if(show) total++;
+  });
+  document.querySelectorAll('.course-card').forEach(card=>{
+    card.style.display = (!q || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+  document.querySelectorAll('.section-block').forEach(block=>{
+    const vr = block.querySelectorAll('.course-table tbody tr:not([style*="display: none"])').length;
+    const vc = block.querySelectorAll('.course-card:not([style*="display: none"])').length;
+    block.style.display = (vr>0||vc>0) ? '' : 'none';
+  });
+  const rc = document.getElementById('resultCount');
+  if(q){ rc.textContent = total + ' course'+(total!==1?'s':'')+' found'; rc.classList.add('visible'); }
+  else  { rc.classList.remove('visible'); }
+  let noRes = document.getElementById('noResults');
+  if(!noRes){
+    noRes = document.createElement('div'); noRes.id='noResults'; noRes.className='no-results';
+    noRes.innerHTML='<i class="fas fa-search"></i>No courses found for <strong id="noResQuery"></strong><br><span>Try different keywords</span>';
+    document.querySelector('.search-sticky-wrap').insertAdjacentElement('afterend', noRes);
+  }
+  const any = document.querySelectorAll('.section-block:not([style*="display: none"])').length > 0;
+  noRes.style.display = (!any && q) ? 'block' : 'none';
+  const qEl = document.getElementById('noResQuery');
+  if(qEl) qEl.textContent = '"'+query.trim()+'"';
+}
+function clearSearch(){
+  const inp = document.getElementById('courseSearch');
+  inp.value=''; filterCourses(''); inp.focus();
+}
+
+/* ─── HAMBURGER ─── */
+const hamBtn = document.getElementById('hamBtn');
+const mobMenu = document.getElementById('mobMenu');
+hamBtn.addEventListener('click', ()=>{
+  const open = mobMenu.classList.toggle('open');
+  hamBtn.classList.toggle('open', open);
+  hamBtn.setAttribute('aria-expanded', open);
+});
+
+/* ─── STICKY HEADER SHADOW ─── */
+window.addEventListener('scroll', ()=>{
+  document.getElementById('siteHeader').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+/* ─── TABLE ROW STAGGER ─── */
+document.querySelectorAll('.course-table tbody tr').forEach((row, i)=>{
+  row.style.animationDelay = (i * 35) + 'ms';
+});
+
+/* ─── SCROLL-TRIGGERED SECTIONS ─── */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.animate-on-scroll').forEach(el=> observer.observe(el));
+
+/* ─── COUNTER ANIMATION ─── */
+function animateCount(el, target, suffix=''){
+  let start = 0; const step = target / 40;
+  const timer = setInterval(()=>{
+    start = Math.min(start + step, target);
+    el.textContent = Math.round(start) + suffix;
+    if(start >= target) clearInterval(timer);
+  }, 30);
+}
+const statsObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('[data-count]').forEach(el=>{
+        animateCount(el, +el.dataset.count, '+');
+      });
+      statsObs.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+const statsEl = document.querySelector('.hero-stats');
+if(statsEl) statsObs.observe(statsEl);
+</script>
+
+</body>
+</html>

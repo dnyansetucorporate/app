@@ -9,7 +9,7 @@ interface ProvidersProps {
 
 const AppProviders: React.FC<ProvidersProps> = ({ children }) => {
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         {children}
       </AuthProvider>

@@ -63,7 +63,7 @@ const VerifyCertificate: React.FC = () => {
     <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col items-center py-16 px-4">
       <div className="w-full max-w-2xl">
         <div className="flex flex-col items-center text-center mb-8">
-          <img src="/logo.svg" alt="DnyanSetu" className="h-14 w-auto object-contain mb-4" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="DnyanSetu" className="h-14 w-auto object-contain mb-4" />
           <h1 className="text-[26px] font-bold text-[#1A2332] flex items-center gap-2">
             <ShieldCheck size={26} className="text-[#4DB8CA]" />
             Certificate Verification
